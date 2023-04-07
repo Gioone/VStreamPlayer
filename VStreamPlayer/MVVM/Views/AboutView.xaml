@@ -1,0 +1,100 @@
+﻿<Window
+    x:Class="VStreamPlayer.MVVM.Views.AboutView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:VStreamPlayer.MVVM.Views"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:userControls="clr-namespace:VStreamPlayer.Assets.UserControls"
+    Title="{DynamicResource AboutString}"
+    Width="600"
+    Height="350"
+    MinWidth="400"
+    MouseLeftButtonDown="Window_MouseLeftButtonDown"
+    MinHeight="300"
+    AllowsTransparency="True"
+    Background="{DynamicResource PlayAreaBackColor}"
+    WindowStyle="None"
+    mc:Ignorable="d">
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="0" CornerRadius="0" />
+    </WindowChrome.WindowChrome>
+
+    <Border
+        BorderBrush="{DynamicResource MainColorBrush}"
+        BorderThickness="1"
+        CornerRadius="0">
+        <Grid>
+            <Grid.RowDefinitions>
+                <!--  For title bar  -->
+                <RowDefinition Height="Auto" />
+
+                <!--  For content  -->
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <DockPanel Height="Auto">
+
+                <TextBlock
+                    Margin="5,0,0,0"
+                    VerticalAlignment="Center"
+                    Style="{DynamicResource NormalTextBlockStyle}"
+                    Text="{DynamicResource AboutString}" />
+                <!--  Close Button  -->
+                <Button
+                    x:Name="BtnClose"
+                    HorizontalAlignment="Right"
+                    Click="BtnClose_Click">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Background" Value="Transparent" />
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border
+                                            Padding="5"
+                                            Background="{TemplateBinding Background}"
+                                            BorderThickness="0"
+                                            CornerRadius="0">
+                                            <ContentControl>
+                                                <userControls:Close
+                                                    Width="20"
+                                                    Height="20"
+                                                    Color="{DynamicResource WindowTitleForeColorOnMouseOver}" />
+                                            </ContentControl>
+                                        </Border>
+
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="{StaticResource WindowTitleBackColor}" />
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </Button.Style>
+                </Button>
+            </DockPanel>
+
+            <Grid Grid.Row="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+
+                <!--  Line  -->
+                <Rectangle Height="1" Fill="{DynamicResource WindowTitleForeColorOnMouseOver}" />
+
+                <ScrollViewer
+                    Grid.Row="1"
+                    HorizontalScrollBarVisibility="Disabled"
+                    VerticalScrollBarVisibility="Hidden">
+                    <ContentControl HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <userControls:AboutUserControl />
+                    </ContentControl>
+                </ScrollViewer>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

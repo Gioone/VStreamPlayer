@@ -1,0 +1,10 @@
+﻿<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:system="clr-namespace:System;assembly=mscorlib">
+    <system:String x:Key="WindowTitleString">欢迎您使用 VStream Player</system:String>
+    <system:String x:Key="WindowTitleCloseString">退出 VStream player</system:String>
+    <system:String x:Key="WindowTitleMaximizeString">最大化/还原窗口</system:String>
+    <system:String x:Key="NotSupportVideoFormat">不支持的视频格式...</system:String>
+
+</ResourceDictionary>

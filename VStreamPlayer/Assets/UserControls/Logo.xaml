@@ -1,0 +1,40 @@
+﻿<UserControl
+    x:Class="VStreamPlayer.Assets.UserControls.Logo"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:VStreamPlayer.Assets.UserControls"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DesignHeight="40"
+    d:DesignWidth="40"
+    DataContext="{Binding RelativeSource={RelativeSource Self}}"
+    mc:Ignorable="d">
+    <Viewbox>
+        <Grid Background="Transparent" ClipToBounds="True">
+            <Ellipse
+                Width="100"
+                Height="100"
+                Stroke="{DynamicResource LogoForeColor}"
+                StrokeThickness="5" />
+            <Ellipse
+                Width="95"
+                Height="95"
+                Stroke="{DynamicResource LogoBackColor}"
+                StrokeThickness="5" />
+            <Ellipse
+                Width="90"
+                Height="90"
+                Stroke="{DynamicResource LogoForeColor}"
+                StrokeThickness="2.5" />
+            <Ellipse
+                Width="85"
+                Height="85"
+                Fill="{DynamicResource LogoBackColor}" />
+            <TextBlock
+                Margin="0,10,0,0"
+                Foreground="{DynamicResource LogoForeColor}"
+                Style="{DynamicResource LogoFontStyle}"
+                Text="V" />
+        </Grid>
+    </Viewbox>
+</UserControl>

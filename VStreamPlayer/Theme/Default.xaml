@@ -1,0 +1,32 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <SolidColorBrush x:Key="WindowTitleForeColor" Color="DimGray" />
+    <SolidColorBrush x:Key="WindowTitleForeColorOnMouseOver" Color="White" />
+    <SolidColorBrush x:Key="FunctionalityButtonForeColor" Color="DimGray" />
+    <SolidColorBrush x:Key="FunctionalityButtonForeColorOnMouseOver" Color="White" />
+    <SolidColorBrush x:Key="WindowTitleBackColor" Color="#3A86FF" />
+    <SolidColorBrush x:Key="CurrentProgressForeground" Color="#3A86FF" />
+    <SolidColorBrush x:Key="TotalProgressBackground" Color="LightGray" />
+
+    <!--<SolidColorBrush x:Key="UnPlayedCircleBackground" Color="White" />-->
+
+    <SolidColorBrush x:Key="ProgressBarHandleColor" Color="White" />
+    <SolidColorBrush x:Key="MainColorBrush" Color="#3A86FF" />
+    <SolidColorBrush x:Key="MainBrushColorLight" Color="#0A66FF" />
+    <SolidColorBrush x:Key="LogoBackColor" Color="#3A86FF" />
+    <SolidColorBrush x:Key="LogoForeColor" Color="White" />
+    <SolidColorBrush x:Key="WindowBackColor" Color="#000025" />
+    <SolidColorBrush x:Key="PlayAreaBackColor" Color="#00001A" />
+    <Color x:Key="MainColor">#3A86FF</Color>
+    <Color x:Key="SecondaryColor">#000025</Color>
+    <Color x:Key="ThirdColor">LightGray</Color>
+    <Color x:Key="FourthColor">White</Color>
+    <!--<Color x:Key="TextColor">#00001A</Color>-->
+
+    <SolidColorBrush x:Key="TooltipBorderColor" Color="{DynamicResource MainColor}" />
+    <SolidColorBrush x:Key="TooltipBackgroundColor" Color="{DynamicResource SecondaryColor}" />
+    <SolidColorBrush x:Key="TextColorBrush" Color="White" />
+    <SolidColorBrush x:Key="TextColorBrushLight" Color="Gray" />
+    <SolidColorBrush x:Key="SecondaryColorBrush" Color="{DynamicResource SecondaryColor}" />
+    <SolidColorBrush x:Key="ThirdColorBrush" Color="{DynamicResource ThirdColor}" />
+    <SolidColorBrush x:Key="FourthColorBrush" Color="{DynamicResource FourthColor}" />
+</ResourceDictionary>

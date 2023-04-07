@@ -1,0 +1,150 @@
+﻿<UserControl
+    x:Class="VStreamPlayer.MVVM.Views.PlayListItemView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:VStreamPlayer.Assets.UserControls.Test"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:userControls="clr-namespace:VStreamPlayer.Assets.UserControls"
+    Height="80"
+    d:Height="100"
+    d:Width="600"
+    Background="{DynamicResource SecondaryColorBrush}"
+    DataContext="{Binding RelativeSource={RelativeSource Self}}"
+    SizeChanged="UserControl_SizeChanged"
+    mc:Ignorable="d">
+
+    <Canvas>
+
+        <StackPanel
+            Canvas.Left="0"
+            Canvas.Top="0"
+            VerticalAlignment="Center"
+            Orientation="Horizontal">
+            <!--  Order  -->
+            <Label
+                Width="{Binding Height}"
+                Height="{Binding Height}"
+                HorizontalContentAlignment="Center"
+                VerticalContentAlignment="Center"
+                Foreground="White">
+                <Viewbox>
+                    <TextBlock Text="{Binding Order}" />
+                </Viewbox>
+            </Label>
+
+            <!--  Video Image  -->
+            <Image
+                Width="{Binding Height}"
+                Height="{Binding Height}"
+                Source="{Binding Thumb}"
+                Stretch="Fill" />
+
+            <StackPanel
+                x:Name="LayoutPanel"
+                MinWidth="100"
+                VerticalAlignment="Center"
+                ClipToBounds="True">
+
+                <!--  Video Title  -->
+                <TextBlock
+                    Margin="0,5,0,0"
+                    HorizontalAlignment="Center"
+                    d:Text="Video Title"
+                    Style="{DynamicResource NormalTextBlockStyle}"
+                    Text="{Binding Title}" />
+
+                <!--  Video Path  -->
+                <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+                    <TextBlock
+                        Margin="0,5,0,0"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Style="{DynamicResource LightTextBlockStyle}"
+                        Text="{DynamicResource VideoPathString}" />
+                    <TextBlock
+                        Margin="0,5,0,0"
+                        HorizontalAlignment="Center"
+                        Style="{DynamicResource LightTextBlockStyle}"
+                        Text="{Binding VideoPath}" />
+                </StackPanel>
+
+                <!--  Video Duration, Size, Format and so on...  -->
+                <Label
+                    Margin="0,5,0,0"
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Center">
+                    <Label.Resources>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+                        </Style>
+                    </Label.Resources>
+                    <StackPanel Orientation="Horizontal">
+                        <!--  Video Duration  -->
+                        <TextBlock
+                            HorizontalAlignment="Center"
+                            Style="{DynamicResource NormalTextBlockStyle}"
+                            Text="{DynamicResource VideoDurationString}" />
+
+                        <TextBlock
+                            HorizontalAlignment="Center"
+                            Style="{DynamicResource NormalTextBlockStyle}"
+                            Text="{Binding Duration}" />
+
+                        <!--  Video Size  -->
+                        <TextBlock
+                            Margin="5,0,0,0"
+                            HorizontalAlignment="Center"
+                            Style="{DynamicResource NormalTextBlockStyle}"
+                            Text="{DynamicResource VideoSizeString}" />
+
+                        <TextBlock
+                            Margin="5,0,0,0"
+                            HorizontalAlignment="Center"
+                            Style="{DynamicResource NormalTextBlockStyle}"
+                            Text="{Binding Size}" />
+
+                        <!--  Video Format  -->
+                        <TextBlock
+                            Margin="5,0,0,0"
+                            HorizontalAlignment="Center"
+                            Style="{DynamicResource NormalTextBlockStyle}"
+                            Text="{DynamicResource VideoFormatString}" />
+
+                        <TextBlock
+                            Margin="5,0,0,0"
+                            HorizontalAlignment="Center"
+                            Style="{DynamicResource NormalTextBlockStyle}"
+                            Text="{Binding Format}" />
+                    </StackPanel>
+                </Label>
+            </StackPanel>
+        </StackPanel>
+
+        <StackPanel
+            Canvas.Right="0"
+            Height="{Binding Height}"
+            MinWidth="100"
+            Margin="30,0,30,0"
+            VerticalAlignment="Center"
+            Orientation="Horizontal">
+            <!--  Play Button  -->
+            <Button
+                x:Name="BtnPlay"
+                Width="32"
+                Height="32"
+                Click="BtnPlay_Click"
+                Style="{DynamicResource PlayButtonStyle}"
+                Tag="Play Button" />
+
+            <!--  Delete Button  -->
+            <Button
+                x:Name="BtnDelete"
+                Margin="20,0,0,0"
+                Click="BtnDelete_Click"
+                Style="{DynamicResource DeleteButtonStyle}"
+                Tag="Delete Button" />
+        </StackPanel>
+
+    </Canvas>
+</UserControl>

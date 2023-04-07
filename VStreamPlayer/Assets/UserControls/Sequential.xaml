@@ -1,0 +1,42 @@
+﻿<UserControl
+    x:Class="VStreamPlayer.Assets.UserControls.Sequential"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:VStreamPlayer.Assets.UserControls"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Width="{Binding WidthAndHeight}"
+    Height="{Binding WidthAndHeight}"
+    d:DesignHeight="100"
+    d:DesignWidth="100"
+    Background="Transparent"
+    DataContext="{Binding RelativeSource={RelativeSource Self}}"
+    mc:Ignorable="d">
+    <Viewbox Stretch="Uniform">
+        <Canvas
+            Name="svg12"
+            Width="1024"
+            Height="1024">
+            <Ellipse
+                Width="1024"
+                Height="1024"
+                d:Stroke="{DynamicResource FunctionalityButtonForeColor}"
+                Stroke="{Binding Color}"
+                StrokeThickness="30" />
+            <Path
+                Name="path10"
+                Canvas.Left="31.75"
+                Canvas.Top="7.025"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                d:Fill="{DynamicResource FunctionalityButtonForeColor}"
+                Data="M106 85.5c-22.1 0-40 17.9-40 40v760.6c0 22.1 17.9 40 40 40s40-17.9 40-40V125.5c0-22.1-17.9-40-40-40zM457.3 85.5c-22.1 0-40 17.9-40 40v760.6c0 22.1 17.9 40 40 40s40-17.9 40-40V125.5c0-22.1-17.9-40-40-40zM955.1 661.4c-7.1-12.4-20.3-20-34.6-20h-72c0-0.8 0.1-1.5 0.1-2.3V125.5c0-22.1-17.9-40-40-40s-40 17.9-40 40v513.6c0 0.8 0 1.5 0.1 2.3h-87c-14.3 0-27.5 7.6-34.6 20-7.1 12.4-7.1 27.6 0 40l119.4 206.8c7.1 12.4 20.3 20 34.6 20s27.5-7.6 34.6-20l119.4-206.8c7.2-12.4 7.2-27.7 0-40z m-154 146.8L751 721.4h100.2l-50.1 86.8z"
+                Fill="{Binding Color}"
+                RenderTransformOrigin=".5,.5">
+                <Path.RenderTransform>
+                    <ScaleTransform ScaleX=".75" ScaleY=".75" />
+                </Path.RenderTransform>
+            </Path>
+        </Canvas>
+    </Viewbox>
+</UserControl>

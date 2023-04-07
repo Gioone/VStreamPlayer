@@ -1,0 +1,27 @@
+﻿<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:system="clr-namespace:System;assembly=mscorlib">
+    <system:String x:Key="WindowTitleString">Welcome you to use VStream Player</system:String>
+    <system:String x:Key="WindowTitleCloseString">Exit VStream player</system:String>
+    <system:String x:Key="WindowTitleMaximizeOrRestoreString">Maximize/Restore window</system:String>
+    <system:String x:Key="WindowTitleMinimumString">Minimum window</system:String>
+    <system:String x:Key="WindowTitleOnTopString">Set window on-top</system:String>
+    <system:String x:Key="WindowTitleNotOnTopString">Set window not on-top</system:String>
+    <system:String x:Key="NotSupportVideoFormat">Invalid video format...</system:String>
+    <system:String x:Key="OpenFile">Open file</system:String>
+    <system:String x:Key="Information">Information</system:String>
+    <system:String x:Key="CouldNotOpenVideoFileString">Sorry, we could not open this file. It seems to be an invalid video file...</system:String>
+    <system:String x:Key="ConfirmString">Confirm</system:String>
+    <system:String x:Key="ErrorString">Error</system:String>
+    <system:String x:Key="HintSearchString">Click here to search</system:String>
+    <system:String x:Key="PlayListString">Play list</system:String>
+    <system:String x:Key="MyConnectionString">My connection</system:String>
+    <system:String x:Key="LocalDiskString">Local disk</system:String>
+    <system:String x:Key="VideoPathString" xml:space="preserve">Path: </system:String>
+    <system:String x:Key="VideoDurationString" xml:space="preserve">Duration: </system:String>
+    <system:String x:Key="VideoSizeString" xml:space="preserve">, Size: </system:String>
+    <system:String x:Key="VideoFormatString" xml:space="preserve">, Format: </system:String>
+    <system:String x:Key="SettingsString" xml:space="preserve">Settings</system:String>
+    <system:String x:Key="AboutString" xml:space="preserve">About</system:String>
+</ResourceDictionary>

@@ -1,0 +1,54 @@
+﻿<UserControl
+    x:Class="VStreamPlayer.Assets.UserControls.Add"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:VStreamPlayer.Assets.UserControls"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Width="{Binding WidthAndHeight}"
+    Height="{Binding WidthAndHeight}"
+    DataContext="{Binding RelativeSource={RelativeSource Self}}"
+    mc:Ignorable="d">
+    <Grid>
+        <Viewbox Stretch="Uniform">
+            <Canvas Width="{Binding WidthAndHeight}" Height="{Binding WidthAndHeight}">
+                <Ellipse
+                    Width="20"
+                    Height="20"
+                    Stroke="{Binding Color}"
+                    StrokeEndLineCap="Round"
+                    StrokeLineJoin="Round"
+                    StrokeStartLineCap="Round"
+                    StrokeThickness="2" />
+                <Line
+                    Canvas.Left="-2"
+                    Canvas.Top="-2"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Top"
+                    Stroke="{Binding Color}"
+                    StrokeEndLineCap="Round"
+                    StrokeLineJoin="Round"
+                    StrokeStartLineCap="Round"
+                    StrokeThickness="2"
+                    X1="12"
+                    X2="12"
+                    Y1="8"
+                    Y2="16" />
+                <Line
+                    Canvas.Left="-2"
+                    Canvas.Top="-2"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Top"
+                    Stroke="{Binding Color}"
+                    StrokeEndLineCap="Round"
+                    StrokeLineJoin="Round"
+                    StrokeStartLineCap="Round"
+                    StrokeThickness="2"
+                    X1="8"
+                    X2="16"
+                    Y1="12"
+                    Y2="12" />
+            </Canvas>
+        </Viewbox>
+    </Grid>
+</UserControl>

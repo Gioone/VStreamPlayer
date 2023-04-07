@@ -1,0 +1,22 @@
+﻿<UserControl
+    x:Class="VStreamPlayer.UserControls.Maximize"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:VStreamPlayer.UserControls"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    DataContext="{Binding RelativeSource={RelativeSource Self}}"
+    mc:Ignorable="d">
+    <Viewbox Width="{Binding Width}" Height="{Binding Height}">
+        <Path
+            Data="M3.8 3.8l16.4 16.4M20.2 3.8L3.8 20.2M15 3h6v6M9 3H3v6M15 21h6v-6M9 21H3v-6"
+            Stroke="#FF000000"
+            StrokeEndLineCap="Round"
+            StrokeLineJoin="Round"
+            StrokeStartLineCap="Round"
+            StrokeThickness="2" />
+    </Viewbox>
+
+</UserControl>

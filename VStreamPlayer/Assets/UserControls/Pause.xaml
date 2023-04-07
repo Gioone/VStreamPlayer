@@ -1,0 +1,42 @@
+﻿<UserControl
+    x:Class="VStreamPlayer.Assets.UserControls.Pause"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:VStreamPlayer.Assets.UserControls"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Width="14"
+    Height="14"
+    d:DesignHeight="14"
+    d:DesignWidth="14"
+    DataContext="{Binding RelativeSource={RelativeSource Self}}"
+    mc:Ignorable="d">
+    <Viewbox Width="14" Height="14">
+        <Grid Width="14" Height="14">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+
+            <Line
+                Stroke="Black"
+                StrokeEndLineCap="Round"
+                StrokeStartLineCap="Round"
+                StrokeThickness="2"
+                X1="3.5"
+                X2="3.5"
+                Y1="1"
+                Y2="13" />
+            <Line
+                Grid.Column="1"
+                Stroke="Black"
+                StrokeEndLineCap="Round"
+                StrokeStartLineCap="Round"
+                StrokeThickness="2"
+                X1="3.5"
+                X2="3.5"
+                Y1="1"
+                Y2="13" />
+        </Grid>
+    </Viewbox>
+</UserControl>

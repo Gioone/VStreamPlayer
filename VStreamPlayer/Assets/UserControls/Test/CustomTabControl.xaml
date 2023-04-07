@@ -1,0 +1,167 @@
+﻿<UserControl
+    x:Class="VStreamPlayer.Assets.UserControls.Test.CustomTabControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:VStreamPlayer.Assets.UserControls.Test"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+    <UserControl.Resources>
+        <TextBlock x:Key="Style" Style="{DynamicResource NormalTextBlockStyle}" />
+
+        <Style TargetType="{x:Type TabControl}">
+            <Setter Property="BorderBrush" Value="Blue" />
+            <Setter Property="BorderThickness" Value="1,0,1,1" />
+            <Setter Property="TabStripPlacement" Value="Top" />
+            <Setter Property="Margin" Value="0" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Background" Value="{DynamicResource SecondaryColorBrush}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type TabControl}">
+                        <Grid
+                            ClipToBounds="True"
+                            KeyboardNavigation.TabNavigation="Local"
+                            SnapsToDevicePixels="True">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Name="ColumnDefinition0" />
+                                <ColumnDefinition Name="ColumnDefinition1" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Name="RowDefinition0" Height="Auto" />
+
+                                <RowDefinition Name="RowDefinition1" Height="*" />
+                            </Grid.RowDefinitions>
+                            <!--  Header  -->
+                            <Border
+                                x:Name="HeaderBorder"
+                                Grid.ColumnSpan="2"
+                                Margin="0,0,0,0"
+                                Background="{DynamicResource SecondaryColorBrush}"
+                                BorderBrush="{DynamicResource MainColorBrush}"
+                                BorderThickness="1,1,1,0"
+                                CornerRadius="0">
+                                <TabPanel
+                                    Name="HeaderPanel"
+                                    Grid.Row="0"
+                                    Grid.Column="0"
+                                    Panel.ZIndex="1"
+                                    IsItemsHost="True"
+                                    KeyboardNavigation.TabIndex="1" />
+                            </Border>
+
+                            <!--  Content panel  -->
+                            <Grid
+                                Name="ContentPanel"
+                                Grid.Row="1"
+                                Grid.Column="0"
+                                Grid.ColumnSpan="2"
+                                KeyboardNavigation.DirectionalNavigation="Contained"
+                                KeyboardNavigation.TabIndex="2"
+                                KeyboardNavigation.TabNavigation="Local">
+                                <Border
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}">
+                                    <ContentPresenter
+                                        Name="PART_SelectedContentHost"
+                                        Margin="0"
+                                        Content="{TemplateBinding SelectedContent}"
+                                        ContentSource="SelectedContent"
+                                        ContentStringFormat="{TemplateBinding SelectedContentStringFormat}"
+                                        ContentTemplate="{TemplateBinding SelectedContentTemplate}"
+                                        SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}" />
+                                </Border>
+                            </Grid>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="TabControl.TabStripPlacement" Value="Bottom">
+                                <Setter TargetName="HeaderPanel" Property="Grid.Row" Value="1" />
+                                <Setter TargetName="ContentPanel" Property="Grid.Row" Value="0" />
+                                <Setter TargetName="RowDefinition0" Property="RowDefinition.Height" Value="*" />
+                                <Setter TargetName="RowDefinition1" Property="RowDefinition.Height" Value="Auto" />
+                                <Setter TargetName="HeaderBorder" Property="FrameworkElement.Margin" Value="0,5,0,0" />
+                            </Trigger>
+                            <Trigger Property="TabControl.TabStripPlacement" Value="Left">
+                                <Setter TargetName="HeaderPanel" Property="Grid.Row" Value="0" />
+                                <Setter TargetName="ContentPanel" Property="Grid.Row" Value="0" />
+                                <Setter TargetName="HeaderPanel" Property="Grid.Column" Value="0" />
+                                <Setter TargetName="ContentPanel" Property="Grid.Column" Value="1" />
+                                <Setter TargetName="ColumnDefinition0" Property="ColumnDefinition.Width" Value="Auto" />
+                                <Setter TargetName="ColumnDefinition1" Property="ColumnDefinition.Width" Value="*" />
+                                <Setter TargetName="RowDefinition0" Property="RowDefinition.Height" Value="*" />
+                                <Setter TargetName="RowDefinition1" Property="RowDefinition.Height" Value="0" />
+                                <Setter TargetName="HeaderBorder" Property="FrameworkElement.Margin" Value="0,0,5,0" />
+                            </Trigger>
+                            <Trigger Property="TabControl.TabStripPlacement" Value="Right">
+                                <Setter TargetName="HeaderPanel" Property="Grid.Row" Value="0" />
+                                <Setter TargetName="ContentPanel" Property="Grid.Row" Value="0" />
+                                <Setter TargetName="HeaderPanel" Property="Grid.Column" Value="1" />
+                                <Setter TargetName="ContentPanel" Property="Grid.Column" Value="0" />
+                                <Setter TargetName="ColumnDefinition0" Property="ColumnDefinition.Width" Value="*" />
+                                <Setter TargetName="ColumnDefinition1" Property="ColumnDefinition.Width" Value="Auto" />
+                                <Setter TargetName="RowDefinition0" Property="RowDefinition.Height" Value="*" />
+                                <Setter TargetName="RowDefinition1" Property="RowDefinition.Height" Value="0" />
+                                <Setter TargetName="HeaderBorder" Property="FrameworkElement.Margin" Value="5,0,0,0" />
+                            </Trigger>
+                            <Trigger Property="UIElement.IsEnabled" Value="False">
+                                <Setter Property="TextElement.Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!--  Header tab item style  -->
+        <Style TargetType="{x:Type TabItem}">
+            <Setter Property="Background" Value="{DynamicResource SecondaryColorBrush}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type TabItem}">
+                        <Border
+                            x:Name="PART_Border"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{DynamicResource FourthColorBrush}"
+                            BorderThickness="1">
+                            <ContentPresenter
+                                Margin="5"
+                                ContentSource="Header"
+                                TextBlock.Foreground="{DynamicResource TextColorBrush}" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="PART_Border" Property="BorderBrush" Value="White" />
+                                <Setter Property="Background" Value="{DynamicResource MainColorBrush}" />
+                                <Setter TargetName="PART_Border" Property="BorderThickness" Value="1" />
+
+                            </Trigger>
+
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="{DynamicResource ThirdColorBrush}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+    <Grid>
+        <Button
+            Width="20"
+            Height="20"
+            Margin="0,4,4,0"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Top"
+            Panel.ZIndex="999"
+            Style="{DynamicResource TitleCloseButtonStyle}" />
+
+        <TabControl>
+            <TabItem Header="播放列表" />
+            <TabItem Header="我的收藏" />
+            <TabItem Header="本地磁盘" />
+        </TabControl>
+    </Grid>
+</UserControl>
