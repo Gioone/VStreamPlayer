@@ -10,7 +10,7 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Theme/Default.xaml" />
                 <ResourceDictionary Source="Styles/ControlStyle.xaml" />
-                <ResourceDictionary Source="Languages/en-us.xaml" />
+                <ResourceDictionary x:Name="LanguageResource" Source="Languages/en-us.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

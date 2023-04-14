@@ -232,13 +232,40 @@
             <!--  Content  -->
             <TabControl Grid.Row="1">
                 <TabItem Header="主题">
-                    <ListBox>
-                        <ListBoxItem>123</ListBoxItem>
-                    </ListBox>
+                    <StackPanel
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Orientation="Horizontal">
+                        <TextBlock HorizontalAlignment="Center" Style="{DynamicResource NormalTextBlockStyle}">选择主题:</TextBlock>
+                        <ComboBox SelectionChanged="CboLanguage_SelectionChanged" />
+                    </StackPanel>
                 </TabItem>
-                <TabItem Header="语言" />
+                <TabItem Margin="0,-1,0,1" Header="语言">
+                    <StackPanel
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Orientation="Horizontal">
+                        <TextBlock Style="{DynamicResource NormalTextBlockStyle}">选择语言:</TextBlock>
+                        <ComboBox x:Name="CboLanguage" SelectionChanged="CboLanguage_SelectionChanged" />
+                    </StackPanel>
+                </TabItem>
+                <TabItem Header="播放" />
                 <TabItem Header="快捷键" />
-                <TabItem Header="音量" />
+                <TabItem Header="音量">
+                    <StackPanel
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Orientation="Vertical">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Style="{DynamicResource NormalTextBlockStyle}">当前音量:</TextBlock>
+                            <Slider />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Style="{DynamicResource NormalTextBlockStyle}">音量平衡:</TextBlock>
+                            <Slider />
+                        </StackPanel>
+                    </StackPanel>
+                </TabItem>
 
                 <!--  About  -->
                 <TabItem Header="关于">

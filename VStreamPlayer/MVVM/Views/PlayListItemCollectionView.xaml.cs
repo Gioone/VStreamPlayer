@@ -42,6 +42,15 @@ namespace VStreamPlayer.MVVM.Views
             return true;
         }
 
+        /// <summary>
+        /// Clear all UI item elements.
+        /// </summary>
+        public void ClearItems()
+        {
+            LstView.Items.Clear();
+            Contents.Clear();
+        }
+
         private int _index = 0;
         
         public PlayListItemCollectionView()
@@ -113,6 +122,16 @@ namespace VStreamPlayer.MVVM.Views
         public void ResetVideosPlayOrder()
         {
             
+        }
+
+        /// <summary>
+        /// Delete an item from Contents
+        /// </summary>
+        /// <param name="item">Specified item that should be deleted</param>
+        public void DeleteItem(PlayListItemView item)
+        {
+            Contents.Remove(item);
+            RefreshUi();
         }
     }
 }

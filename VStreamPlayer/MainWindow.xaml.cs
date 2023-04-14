@@ -3,23 +3,26 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Threading;
 using VStreamPlayer.Core;
+using VStreamPlayer.MVVM.Models;
+using VStreamPlayer.MVVM.ViewModels;
 using VStreamPlayer.MVVM.Views;
 using VStreamPlayer.Window.MessageBox;
 using Application = System.Windows.Application;
+using Task = System.Threading.Tasks.Task;
+using VideoInfo = VStreamPlayer.Core.VideoInfo;
 using WindowState = System.Windows.WindowState;
 
 
 namespace VStreamPlayer
 {
-    // TODO: 打开视频添加到播放列表的功能还未实现，拖拽打开视频功能还未实现
     // TODO: 鼠标在进度条上时，应该显示视频的缩略图
     // TODO: 打开视频，音量的大小等操作应该显示在窗体上给用户提示
     /// <summary>
@@ -62,7 +65,22 @@ namespace VStreamPlayer
         /// </summary>
         public VStreamPlayer.Core.WindowState VStreamPlayerWindowState { get; set; } = Core.WindowState.Normal;
 
-        // private bool _currentVideoIsValid;
+        private bool _isMuted;
+        
+        // private double _lastVolume;
+
+        /// <summary>
+        /// Volume is muted or not. <see langword="true" /> is muted. <see langword="false" /> isn't muted.
+        /// </summary>
+        public bool IsMuted
+        {
+            get { return _isMuted; }
+            set
+            {
+                SetField(ref _isMuted, value);
+            }
+        }
+
 
         public bool CurrentVideoIsValid
         {
@@ -254,6 +272,46 @@ namespace VStreamPlayer
         public MainWindow()
         {
             InitializeComponent();
+            AddHandlers();
+        }
+
+        private void AddHandlers()
+        {
+            ProgressSlider.AddHandler(MouseLeftButtonDownEvent, new MouseButtonEventHandler(ProgressSlider_MouseLeftButtonDown), true);
+        }
+
+        // TODO: BUG: 这里可以做一个测试 BUG，当单击视频进度条时，进度条不会跳转
+        private void ProgressSlider_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (IsPlaying || IsPaused)
+            {
+                var point = e.GetPosition(ProgressSlider);
+
+                Debug.WriteLine($"{point.X}, {ProgressSlider.ActualWidth}");
+
+                double scale = point.X / ProgressSlider.ActualWidth;
+
+                decimal mScale = System.Convert.ToDecimal(scale);
+
+                decimal mActualWidth = System.Convert.ToDecimal(ProgressSlider.ActualWidth);
+
+                decimal mMax = System.Convert.ToDecimal(ProgressSlider.Maximum);
+
+                decimal mRes = mMax * mScale;
+
+                mRes = Math.Round(mRes, MidpointRounding.AwayFromZero);
+
+                // Slider slider = sender as Slider;
+                // TimeSpan value = TimeSpan.FromMilliseconds(ProgressSlider.Value);
+                double dRes;
+
+                dRes = System.Convert.ToDouble(mRes);
+
+                ProgressSlider.Value = dRes;
+
+                
+                MediaMain.Position = TimeSpan.FromMilliseconds(dRes);
+            }
         }
 
         private void BtnClose_Click(object sender, RoutedEventArgs e)
@@ -492,12 +550,15 @@ namespace VStreamPlayer
 
                         try
                         {
-                            var item = new PlayListItemView(videoPath);
-                            PlayList.PlayListContents.AddItem(item);
+                            var item = new PlayListItemModel(videoPath);
+
+                            PlayListItemsViewModel vm = PlayList.PlayListContents.DataContext as PlayListItemsViewModel;
+
+                            vm?.AddItem(item);
                             PlayList.CurrentPlayList = PlayList.PlayListContents;
-                            PlayList.SetPlayListContentsBackground(item);
                             PlayList.CurrentPlay = item;
                             PlayList.SetNextPlayVideo();
+                            
                         }
                         catch
                         {
@@ -567,12 +628,57 @@ namespace VStreamPlayer
 
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
-
+            // Play or pause the video
             if (e.Key == Key.Space)
             {
                 if (CheckVideoStatus())
                 {
                     PlayOrPauseVideo();
+                }
+            }  
+            // Maximize/normal window
+            else if (e.Key == Key.Enter)
+            {
+                MaximizeOrNormalWindow();
+            }
+            // Video Stepping
+            else if (e.Key == Key.Right)
+            {
+                if (IsPlaying || IsPaused)
+                {
+                    MediaMain.Position += TimeSpan.FromSeconds(5);
+                }
+            }
+            // Video Rewind
+            else if (e.Key == Key.Left)
+            {
+                if (IsPlaying || IsPaused)
+                {
+                    MediaMain.Position -= TimeSpan.FromSeconds(5);
+                }
+            }
+            // Volume up
+            else if (e.Key == Key.Up)
+            {
+                if (MediaMain.Volume >= 0.9)
+                {
+                    MediaMain.Volume = 1.0;
+                }
+                else
+                {
+                    MediaMain.Volume += 0.1;
+                }
+            }
+            // Volume down
+            else if (e.Key == Key.Down)
+            {
+                if (MediaMain.Volume <= 0.1)
+                {
+                    MediaMain.Volume = 0;
+                }
+                else
+                {
+                    MediaMain.Volume -= 0.1;
                 }
             }
         }
@@ -588,12 +694,12 @@ namespace VStreamPlayer
         private void MediaMain_MediaOpened(object sender, RoutedEventArgs e)
         {
             CurrentVideoIsValid = true;
-            // 通知 PlayList 为下一首播放的歌曲做准备。
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             // new SettingsView().Show();
+            // new TestWindow.TestWindow().Show();
         }
 
         private void MediaMain_MediaEnded(object sender, RoutedEventArgs e)
@@ -616,7 +722,6 @@ namespace VStreamPlayer
             await PlayAnotherVideo(nextPlay.VideoPath);
 
             PlayList.SetCurrentAndNextPlayVideo();
-            PlayList.SetPlayListContentsBackground(PlayList.CurrentPlay);
         }
 
         private bool _isContinueToPlay;
@@ -939,7 +1044,6 @@ namespace VStreamPlayer
 
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            // TODO: 这里用来做视频进度条的点击跳转到对应位置
             // Point point = e.GetPosition(ProgressSlider);
             // Debug.WriteLine($"{point.X}, {point.Y}");
         }
@@ -968,11 +1072,139 @@ namespace VStreamPlayer
             SettingsView.Show();
         }
 
-        private static AboutView aboutView = new();
+        private static AboutView AboutView = new();
 
         private void AboutItem_Click(object sender, RoutedEventArgs e)
         {
-            aboutView.Show();
+            AboutView.Show();
+        }
+
+        private async void BtnNext_Click(object sender, RoutedEventArgs e)
+        {
+            var vm = PlayList.CurrentPlayList.DataContext as PlayListItemsViewModel;
+
+            if (vm is null || vm.Contents.Count == 0)
+            {
+                return;
+            }
+
+            if (PlaybackOrder != PlaybackOrder.SingleLoop)
+            {
+                PlayNextVideo();
+            }
+            else
+            {
+                var currentPlay = PlayList.CurrentPlay;
+                int iOrder = currentPlay.Order;
+                iOrder += 1;
+
+                var selectItem = vm.Contents.FirstOrDefault(select => select.Order == iOrder);
+
+                if (selectItem is null)
+                {
+                    return;
+                }
+
+                PlayList.CurrentPlay = selectItem;
+                PlayList.SetNextPlayVideo();
+                await PlayAnotherVideo(selectItem.VideoPath);
+            }
+            
+        }
+
+        private async void BtnBackward_Click(object sender, RoutedEventArgs e)
+        {
+            if (PlayList.CurrentPlayList.DataContext is not PlayListItemsViewModel vm || vm.Contents.Count == 0)
+            {
+                return;
+            }
+
+            if (PlaybackOrder == PlaybackOrder.SequentialPlay || PlaybackOrder == PlaybackOrder.SingleLoop)
+            {
+                var currentPlay = PlayList.CurrentPlay;
+                if (currentPlay is null)
+                {
+                    return;
+                }
+
+                int iOrder = currentPlay.Order;
+                iOrder -= 1;
+                var selectItem = vm.Contents.FirstOrDefault(select => select.Order == iOrder);
+
+                if (selectItem is null)
+                {
+                    return;
+                }
+
+                PlayList.CurrentPlay = selectItem;
+                PlayList.SetNextPlayVideo();
+                await PlayAnotherVideo(selectItem.VideoPath);
+            } 
+            else
+            {
+                PlayNextVideo();
+            }
+            
+        }
+
+        private void ProgressSlider_MouseMove(object sender, MouseEventArgs e)
+        {
+
+        }
+
+        private void ProgressSlider_MouseLeave(object sender, MouseEventArgs e)
+        {
+
+        }
+
+        private async void Window_Drop(object sender, DragEventArgs e)
+        {
+            string fileName = ((System.Array) e.Data.GetData(DataFormats.FileDrop))?.GetValue(0).ToString();
+
+            if (string.IsNullOrEmpty(fileName)) return;
+
+            bool isValidVideo = await VStreamPlayer.Core.HelperUtils.CheckIsValidVideo(fileName);
+
+            if (!isValidVideo) return;
+
+            CurrentVideoIsValid = isValidVideo;
+
+            StopVideo();
+
+            // We hide this element under the MediaMain element. 
+            Logo.SetValue(Panel.ZIndexProperty, -1);
+            MediaMain.Source = new Uri(fileName);
+            CurrentVideoPath = fileName;
+
+            try
+            {
+                var item = new PlayListItemModel(fileName);
+
+                PlayListItemsViewModel vm = PlayList.PlayListContents.DataContext as PlayListItemsViewModel;
+
+                vm?.AddItem(item);
+                PlayList.CurrentPlayList = PlayList.PlayListContents;
+                PlayList.CurrentPlay = item;
+                PlayList.SetNextPlayVideo();
+
+            }
+            catch
+            {
+
+            }
+
+            MediaMain.Play();
+            IsPlaying = true;
+        }
+        private void MenuItemRotate90_Click(object sender, RoutedEventArgs e)
+        {
+            MediaMain.RenderTransform = 
+        }
+
+        private void MenuItemMaximize_Click(object sender, RoutedEventArgs e)
+        {
+            MaximizeOrNormalWindow();
         }
     }
+    
 }

@@ -5,6 +5,8 @@ using System.IO;
 using System.Text;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using System.Windows;
+using FFMpegCore;
 
 namespace VStreamPlayer.FFMpeg
 {
@@ -50,6 +52,12 @@ namespace VStreamPlayer.FFMpeg
             }
         }
         */
+
+        public static async void GetSnapshot()
+        {
+            
+            // var bitmap = FFMpegCore.FFMpeg.Snapshot("inputPath", new Size(2,4), TimeSpan.FromMinutes(1));
+        }
 
 
         /// <summary>

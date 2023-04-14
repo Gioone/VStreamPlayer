@@ -17,11 +17,14 @@
     <system:String x:Key="HintSearchString">Click here to search</system:String>
     <system:String x:Key="PlayListString">Play list</system:String>
     <system:String x:Key="MyConnectionString">My connection</system:String>
-    <system:String x:Key="LocalDiskString">Local disk</system:String>
+    <system:String x:Key="PlayHistoryString">Play history</system:String>
     <system:String x:Key="VideoPathString" xml:space="preserve">Path: </system:String>
     <system:String x:Key="VideoDurationString" xml:space="preserve">Duration: </system:String>
     <system:String x:Key="VideoSizeString" xml:space="preserve">, Size: </system:String>
     <system:String x:Key="VideoFormatString" xml:space="preserve">, Format: </system:String>
     <system:String x:Key="SettingsString" xml:space="preserve">Settings</system:String>
     <system:String x:Key="AboutString" xml:space="preserve">About</system:String>
+    <system:String x:Key="SequentialPlayString">Sequential Play</system:String>
+    <system:String x:Key="SingleLoopString">Single lopp</system:String>
+    <system:String x:Key="RandomPlayString">Random play</system:String>
 </ResourceDictionary>

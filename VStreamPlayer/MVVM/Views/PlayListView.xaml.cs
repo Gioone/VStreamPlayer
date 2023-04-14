@@ -2,21 +2,24 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Xml;
+using System.Xml.Linq;
 using VStreamPlayer.Core;
+using VStreamPlayer.MVVM.Models;
+using VStreamPlayer.MVVM.ViewModels;
 using Button = System.Windows.Controls.Button;
 using Label = System.Windows.Controls.Label;
 using Random = System.Random;
 
 namespace VStreamPlayer.MVVM.Views
 {
-    // TODO: 歌曲单项的删除按钮可以优化一下
-    // TODO: 播放列表和我的收藏需要保存到本地磁盘的介质中
     /// <summary>
     /// PlayListView.xaml 的交互逻辑
     /// </summary>
@@ -47,9 +50,10 @@ namespace VStreamPlayer.MVVM.Views
         /// </summary>
         public void SetNextPlayVideo()
         {
+            PlayListItemsViewModel vm = CurrentPlayList.DataContext as PlayListItemsViewModel;
             try
             {
-                CurrentPlay ??= CurrentPlayList.Contents.First();
+                CurrentPlay ??= vm.Contents.First();
             }
             catch
             {
@@ -65,7 +69,7 @@ namespace VStreamPlayer.MVVM.Views
                     }
                     else
                     {
-                        var res = CurrentPlayList.Contents.SingleOrDefault(m => m.Order == (CurrentPlay.Order + 1));
+                        var res = vm.Contents.SingleOrDefault(m => m.Order == (CurrentPlay.Order + 1));
                         NextPlay = res;
                     }
 
@@ -79,7 +83,7 @@ namespace VStreamPlayer.MVVM.Views
                     Random random = new Random();
                     try
                     {
-                        NextPlay = CurrentPlayList.Contents.ElementAt(random.Next(0, CurrentPlayList.Contents.Count));
+                        NextPlay = vm.Contents.ElementAt(random.Next(0, vm.Contents.Count));
                     }
                     catch
                     {
@@ -90,30 +94,42 @@ namespace VStreamPlayer.MVVM.Views
             }
         }
 
+        private PlayListItemModel _currentPlay;
+
         /// <summary>
         /// Current play video.
         /// </summary>
-        public PlayListItemView CurrentPlay { get; set; }
+        public PlayListItemModel CurrentPlay
+        {
+            get { return _currentPlay; }
+            set
+            {
+                _currentPlay = value;
+                SetPlayListContentsBackground(value);
+            }
+        }
 
         /// <summary>
         /// Next play video. <see langword="null" /> doesn't have the next play video.
         /// </summary>
-        public PlayListItemView NextPlay { get; set; }
+        public PlayListItemModel NextPlay { get; set; }
 
 
 
-        public PlayListItemCollectionView PlayListContents { get; set; }
-        public PlayListItemCollectionView MyCollectionContents { get; set; }
-        public PlayListItemCollectionView LocalDiskContents { get; set; }
+        public PlayListItemCollectionViewNew PlayListContents { get; set; }
+        public PlayListItemCollectionViewNew MyCollectionContents { get; set; }
+        public PlayListItemCollectionViewNew PlayHistoryContents { get; set; }
 
         /// <summary>
         /// Current play list
         /// </summary>
-        public PlayListItemCollectionView CurrentPlayList { get; set; }
+        public PlayListItemCollectionViewNew CurrentPlayList { get; set; }
+
+        public PlayListItemCollectionViewNew TmpContents { get; set; } = new();
 
         private string _searchText = "";
 
-        // TODO: 搜索功能无效，应该优化
+        // TODO: BUG: 这里可以做个 BUG，搜索功能无效。
         public string SearchText
         {
             get { return _searchText; }
@@ -129,17 +145,67 @@ namespace VStreamPlayer.MVVM.Views
         private void SelectVideos(string value)
         {
             string strPlayList = VStreamPlayer.Helper.Resource.FindStringResource("PlayListString", "Play list");
-            if (PlayList.SelectedItem is string str && str == strPlayList)
+            string strMyCollection = VStreamPlayer.Helper.Resource.FindStringResource("MyConnectionString", "My connection");
+            string strPlayHistory = VStreamPlayer.Helper.Resource.FindStringResource("PlayHistoryString", "Play history");
+
+            TabItem tab = PlayList.SelectedItem as TabItem;
+
+            Label label = PlayList.SelectedContent as Label;
+
+            if (string.IsNullOrEmpty(value))
             {
-                if ((PlayList.SelectedContent as ScrollViewer)?.Content is PlayListItemCollectionView content)
+                if (tab.Header is string str && str == strPlayList)
                 {
-                    IEnumerable enumerable = content.Contents.Select(e => e.Title.Contains(value));
-                    foreach (var v in enumerable)
-                    {
-                        var i = v as PlayListItemView;
-                    }
+                    label.Content = PlayListContents;
+
+                    var vm = PlayListContents.DataContext as PlayListItemsViewModel;
+                    vm.RefreshConnection();
                 }
+                else if (tab.Header is string str2 && str2 == strMyCollection)
+                {
+                    label.Content = MyCollectionContents;
+
+                    var vm = PlayListContents.DataContext as PlayListItemsViewModel;
+                    vm.RefreshConnection();
+                }
+                else
+                {
+                    label.Content = strPlayHistory;
+
+                    var vm = PlayListContents.DataContext as PlayListItemsViewModel;
+                    vm.RefreshConnection();
+                }
+                return;
             }
+
+            PlayListItemsViewModel vm2;
+
+            if (tab.Header is string str1 && str1 == strPlayList)
+            {
+                vm2 = PlayListContents.DataContext as PlayListItemsViewModel;
+                
+            } 
+            else if (tab.Header is string str2 && str2 == strMyCollection)
+            {
+                vm2 = MyCollectionContents.DataContext as PlayListItemsViewModel;
+            }
+            else
+            {
+                vm2 = PlayHistoryContents.DataContext as PlayListItemsViewModel;
+            }
+
+            IEnumerable<PlayListItemModel> res = from p in vm2.Contents
+                where p.Title.Contains(value)
+                select p;
+
+            var tmpVm = TmpContents.DataContext as PlayListItemsViewModel;
+            tmpVm.Contents.Clear();
+            foreach (var item in res)
+            {
+                tmpVm.AddItem(item);
+            }
+
+            label.Content = TmpContents;
         }
 
 
@@ -150,7 +216,7 @@ namespace VStreamPlayer.MVVM.Views
 
             PlayListContents = new();
             MyCollectionContents = new();
-            LocalDiskContents = new();
+            PlayHistoryContents = new();
             CurrentPlayList = PlayListContents;
 
             InitManually();
@@ -160,11 +226,11 @@ namespace VStreamPlayer.MVVM.Views
         {
             string strPlayList = VStreamPlayer.Helper.Resource.FindStringResource("PlayListString", "Play list");
             string strMyConnection = VStreamPlayer.Helper.Resource.FindStringResource("MyConnectionString", "My connection");
-            string strLocalDisk = VStreamPlayer.Helper.Resource.FindStringResource("LocalDiskString", "Local disk");
+            string strPlayHistory = VStreamPlayer.Helper.Resource.FindStringResource("PlayHistoryString", "Play history");
 
             foreach (var v in PlayList.Items)
             {
-                if (v is TabItem {Header: string str1} item1 && str1 == strPlayList)
+                if (v is TabItem { Header: string str1 } item1 && str1 == strPlayList)
                 {
                     if (item1.Content is Label label)
                     {
@@ -177,89 +243,79 @@ namespace VStreamPlayer.MVVM.Views
                     {
                         label.Content = MyCollectionContents;
                     }
-                } 
-                else if(v is TabItem { Header: string str3 } item3 && str3 == strLocalDisk)
+                }
+                else if (v is TabItem { Header: string str3 } item3 && str3 == strPlayHistory)
                 {
                     if (item3.Content is Label label)
                     {
-                        label.Content = LocalDiskContents;
+                        label.Content = PlayHistoryContents;
                     }
                 }
             }
 
-            /*
-            if (this.PlayList.SelectedItem is TabItem item)
-            {
-                if (item.Header is string str && str == strPlayList)
-                {
-                    // ScrollView
-
-                    // PlayListContents = new PlayListItemCollectionView();
-
-                    if (PlayList.SelectedContent is Label obj) obj.Content = PlayListContents;
-                }
-            }*/
         }
 
-        private void InitTestDatas()
+        private async void Button_Click(object sender, RoutedEventArgs e)
         {
-#if DEBUG
-            string strPlayList = VStreamPlayer.Helper.Resource.FindStringResource("PlayListString", "Play list");
-            if (this.PlayList.SelectedItem is TabItem item)
-            {
-                if (item.Header is string str && str == strPlayList)
-                {
-                    // ScrollView
-                    var obj = PlayList.SelectedContent as Label;
-
-                    PlayListContents = new PlayListItemCollectionView();
-
-                    if (obj is not null) obj.Content = PlayListContents;
-                }
-            }
-#endif
-        }
-
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
+            
             // User clicked play button.
             if (e.OriginalSource is Button { Tag: "Play Button" } btn)
             {
                 string strPlayList = VStreamPlayer.Helper.Resource.FindStringResource("PlayListString", "Play list");
                 string strMyConnection = VStreamPlayer.Helper.Resource.FindStringResource("MyConnectionString", "My connection");
-                string strLocalDisk = VStreamPlayer.Helper.Resource.FindStringResource("LocalDiskString", "Local disk");
+                string strPlayHistory = VStreamPlayer.Helper.Resource.FindStringResource("PlayHistoryString", "Play history");
 
                 // Set Current play list.
-                if (PlayList.SelectedItem is string str1 && str1 == strPlayList)
+                if (PlayList.SelectedItem is TabItem { Header: string str1 } && str1 == strPlayList)
                 {
                     CurrentPlayList = PlayListContents;
-                } 
-                else if (PlayList.SelectedItem is string str2 && str2 == strMyConnection)
+                }
+                else if (PlayList.SelectedItem is TabItem { Header: string str2 } && str2 == strMyConnection)
                 {
                     CurrentPlayList = MyCollectionContents;
                 }
-                else if (PlayList.SelectedItem is string str3 && str3 == strLocalDisk)
+                else if (PlayList.SelectedItem is TabItem { Header: string str3 } && str3 == strPlayHistory)
                 {
-                    CurrentPlayList = LocalDiskContents;
+                    CurrentPlayList = PlayHistoryContents;
                 }
 
-                // Find the parent control which is named PlayListItemView.
-                PlayListItemView item = VStreamPlayer.Core.HelperUtils.GetParentControl<PlayListItemView>(btn);
+                // Get datacontext of button
+                PlayListItemModel model = btn.DataContext as PlayListItemModel;
 
-                SetPlayListContentsBackground(item);
+                // Let main page play the video.
+                WindowCollection windows = Application.Current.Windows;
+                foreach (var window in windows)
+                {
+                    if (window is MainWindow win)
+                    {
+                        await win.PlayAnotherVideo(model.VideoPath);
+                    }
+                }
 
-
-                CurrentPlay = item;
+                CurrentPlay = model;
                 if (PlaybackOrder == PlaybackOrder.SingleLoop)
                 {
-                    NextPlay = item;
+                    NextPlay = model;
                 }
                 else if (PlaybackOrder == PlaybackOrder.RandomPlay)
                 {
                     Random random = new Random();
                     try
                     {
-                        NextPlay = CurrentPlayList.Contents.ElementAt(random.Next(0, CurrentPlayList.Contents.Count));
+                        var lstView = CurrentPlayList.Content as ListView;
+                        var coll = lstView?.Items;
+
+                        List<PlayListItemModel> list = new List<PlayListItemModel>();
+
+                        foreach (var item in coll)
+                        {
+
+                            list.Add(item as PlayListItemModel);
+                        }
+
+                        int iMax = coll.Count;
+
+                        NextPlay = list.ElementAt(random.Next(0, iMax));
                     }
                     catch
                     {
@@ -270,8 +326,20 @@ namespace VStreamPlayer.MVVM.Views
                 // Sequential play
                 else
                 {
-                    int iIndex = item.Order;
-                    PlayListItemView view = CurrentPlayList.Contents.SingleOrDefault(select => select.Order == ++iIndex);
+                    var lstView = CurrentPlayList.Content as ListView;
+                    var coll = lstView?.Items;
+
+                    List<PlayListItemModel> list = new List<PlayListItemModel>();
+
+                    foreach (var item in coll)
+                    {
+
+                        list.Add(item as PlayListItemModel);
+                    }
+
+                    int iIndex = model.Order;
+                    iIndex += 1;
+                    PlayListItemModel view = list.FirstOrDefault(select => select.Order == iIndex);
                     if (view is not null)
                     {
                         NextPlay = view;
@@ -282,33 +350,93 @@ namespace VStreamPlayer.MVVM.Views
                     }
                 }
             }
+            else if (e.OriginalSource is Button {Tag: "Delete Button"} deleteBtn)
+            {
+
+                TabItem tabItem = PlayList.SelectedItem as TabItem;
+
+                Label label = tabItem.Content as Label;
+
+                // Get current play list.
+                if (label?.Content is PlayListItemCollectionViewNew view)
+                {
+                    PlayListItemModel model = deleteBtn.DataContext as PlayListItemModel;
+
+                    // TODO: BUG：这里可以用来做一个测试，刚开始时单击删除没有任何反应
+                    var vm = view.DataContext as PlayListItemsViewModel;
+
+                    var deletedList = new List<PlayListItemModel>();
+
+                    deletedList.Add(model);
+
+                    vm.DeleteItems(deletedList);
+
+                    // Judge current play list is equals to deleted list.
+                    if (CurrentPlayList == view)
+                    {
+                        // Judge NextPlay is existed or not. And we deal with it.
+                        bool isEqualsZero = vm.Contents.Count == 0;
+
+                        bool isNextPlayExisted = false;
+
+                        if (!isEqualsZero)
+                        {
+                            isNextPlayExisted = vm.Contents.Contains(model);
+                        }
+
+                        if (!isNextPlayExisted)
+                        {
+                            if (isEqualsZero)
+                            {
+                                NextPlay = null;
+                            }
+                            else
+                            {
+                                NextPlay = vm.Contents.FirstOrDefault();
+                            }
+                        }
+                    }
+                }
+
+            }
+
+
         }
 
         /// <summary>
         /// Set Play list items background.
         /// </summary>
-        public void SetPlayListContentsBackground(PlayListItemView view)
+        public void SetPlayListContentsBackground(PlayListItemModel view)
         {
-            foreach (var v in PlayListContents.Contents)
+
+            foreach (var item in PlayList.Items)
             {
-                v.Background = VStreamPlayer.Helper.Resource.FindColorResource("SecondaryColorBrush");
+                var tabItem = item as TabItem;
+
+                SetSingleTabContentsBackground(tabItem);
             }
 
-            foreach (var v in MyCollectionContents.Contents)
+
+            view.Background = PlayListItemModel.PlayingBackground;
+
+        }
+
+        private void SetSingleTabContentsBackground(TabItem item)
+        {
+            Label label1 = item?.Content as Label;
+
+            PlayListItemCollectionViewNew viewNew1 = label1?.Content as PlayListItemCollectionViewNew;
+
+            ListView lstView1 = viewNew1?.Content as ListView;
+
+            var models = lstView1.Items;
+
+            foreach (var v in models)
             {
-                v.Background = VStreamPlayer.Helper.Resource.FindColorResource("SecondaryColorBrush");
+                var model = v as PlayListItemModel;
+                model.Background = PlayListItemModel.DefaultBackground;
             }
 
-            foreach (var v in LocalDiskContents.Contents)
-            {
-                v.Background = VStreamPlayer.Helper.Resource.FindColorResource("SecondaryColorBrush");
-            }
-            if (view is not null)
-            {
-                // TODO: 自动播放下一首时，当前播放的歌曲背景色没有得到更改
-                Brush brush = VStreamPlayer.Helper.Resource.FindColorResource("MainColorBrush");
-                view.Background = brush;
-            }
         }
 
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -346,6 +474,7 @@ namespace VStreamPlayer.MVVM.Views
             string[] strArr = VStreamPlayer.Core.HelperUtils.OpenMultiVideos();
             if (strArr is null || strArr.Length == 0) return;
 
+            // Stored the legal files.
             List<string> lstString = new List<string>();
 
             foreach (var str in strArr)
@@ -354,24 +483,38 @@ namespace VStreamPlayer.MVVM.Views
                 lstString.Add(str);
             }
 
-            Label label = PlayList.SelectedContent as Label;
+            TabItem label = PlayList.SelectedItem as TabItem;
 
-            if (label?.Content is PlayListItemCollectionView view)
+            if (label?.Header is string strHeader)
             {
+                string strPlayList = VStreamPlayer.Helper.Resource.FindStringResource("PlayListString", "Play list");
+                string strMyConnection = VStreamPlayer.Helper.Resource.FindStringResource("MyConnectionString", "My connection");
+                string strPlayHistory = VStreamPlayer.Helper.Resource.FindStringResource("PlayHistoryString", "Play history");
+
+                PlayListItemCollectionViewNew view;
+
+                if (strPlayList == strHeader)
+                {
+                    view = PlayListContents;
+                }
+                else if (strMyConnection == strHeader)
+                {
+                    view = MyCollectionContents;
+                }
+                else
+                {
+                    view = PlayHistoryContents;
+                }
+
                 foreach (var str in lstString)
                 {
                     try
                     {
-                        var item = new PlayListItemView(str);
+                        var item = new PlayListItemModel(str);
 
-                        // Get the max order.
-                        int iMax = view.Contents.Max(m => m.Order);
+                        var vm = view.DataContext as PlayListItemsViewModel;
 
-                        // PlayListItemView res = view.Contents.SingleOrDefault(m => m.Order == iMax);
-
-                        item.Order = ++iMax;
-
-                        view.Contents.Add(item);
+                        vm?.AddItem(item);
                     }
                     catch
                     {
@@ -379,34 +522,37 @@ namespace VStreamPlayer.MVVM.Views
                     }
                 }
 
-                view.RefreshUi();
             }
+            
         }
 
         private void BtnDelete_Click(object sender, RoutedEventArgs e)
         {
             if (PlayList.SelectedContent is Label label)
             {
-                ListView lstView = VStreamPlayer.Core.HelperUtils.GetChildControl<ListView>(label);
+                var view = label.Content as PlayListItemCollectionViewNew;
+
+                var vm = view.DataContext as PlayListItemsViewModel;
+
+                ListView lstView = view.Content as ListView;
 
                 var items = lstView.SelectedItems;
 
-                var view = VStreamPlayer.Core.HelperUtils.GetChildControl<PlayListItemCollectionView>(label);
+                List<PlayListItemModel> deletedList = new List<PlayListItemModel>();
 
                 if (items.Count > 0)
                 {
-                    foreach (var v in items)
+                    for (int i = 0; i < items.Count; i++)
                     {
-                        var removed = v as PlayListItemView;
-                        view.Contents.Remove(removed);
+                        deletedList.Add(items[i] as PlayListItemModel);
                     }
 
-                    view.RefreshUi();
+                    vm.DeleteItems(deletedList);
 
                     // bool isCurrentPlayExists = false;
                     bool isNextPlayExists = false;
 
-                    isNextPlayExists = view.Contents.Contains(NextPlay);
+                    isNextPlayExists = vm.Contents.Contains(NextPlay);
 
                     if (!isNextPlayExists)
                     {
@@ -414,10 +560,10 @@ namespace VStreamPlayer.MVVM.Views
                         NextPlay = null;
                     }
 
-
                 }
 
             }
+            
         }
 
         /// <summary>
@@ -425,21 +571,22 @@ namespace VStreamPlayer.MVVM.Views
         /// </summary>
         public void SetCurrentAndNextPlayVideo()
         {
-            CurrentPlay = NextPlay;
+            // Set current play
+            if (NextPlay is not null)
+            {
+                CurrentPlay = NextPlay;
+            }
+
+
+            var model = CurrentPlayList.DataContext as PlayListItemsViewModel;
+
+            // Set next play
             switch (PlaybackOrder)
             {
                 case PlaybackOrder.SequentialPlay:
-                    var res = CurrentPlayList.Contents.SingleOrDefault(m => m.Order == (CurrentPlay.Order + 1));
-                    if (res is not null)
-                    {
-                        NextPlay = res;
-                    }
-
-                    // Currently at the end of the playlist.
-                    if (res is null)
-                    {
-                        NextPlay = null;
-                    }
+                    var res = model.Contents.SingleOrDefault(m => m.Order == (CurrentPlay.Order + 1));
+                    
+                    NextPlay = res;
                     break;
 
                 case PlaybackOrder.SingleLoop:
@@ -450,7 +597,7 @@ namespace VStreamPlayer.MVVM.Views
                     Random random = new Random();
                     try
                     {
-                        NextPlay = CurrentPlayList.Contents.ElementAt(random.Next(0, CurrentPlayList.Contents.Count));
+                        NextPlay = model.Contents.ElementAt(random.Next(0, model.Contents.Count));
                     }
                     catch
                     {
@@ -459,6 +606,56 @@ namespace VStreamPlayer.MVVM.Views
                     }
                     break;
             }
+        }
+
+        private void Window_Closing(object sender, CancelEventArgs e)
+        {
+            SaveDatas();
+        }
+
+        private void SaveDatas()
+        {
+            string strPlayList = VStreamPlayer.Helper.Resource.FindStringResource("PlayListString", "Play list");
+            string strMyConnection = VStreamPlayer.Helper.Resource.FindStringResource("MyConnectionString", "My connection");
+            string strPlayHistory = VStreamPlayer.Helper.Resource.FindStringResource("PlayHistoryString", "Play history");
+
+            /*
+            foreach (var v in PlayList.Items)
+            {
+                // Save play list items.
+                if (v is TabItem { Header: string str1 } item1 && str1 == strPlayList)
+                {
+                    string filePath = Path.Combine(System.Windows.Forms.Application.StartupPath, "Data");
+                    if (!Directory.Exists(filePath))
+                    {
+                        Directory.CreateDirectory(filePath);
+                    }
+
+                    filePath = Path.Combine(filePath, "PlayList.xml");
+                    if (!File.Exists(filePath))
+                    {
+                        File.Create(filePath);
+                    }
+
+                    XDocument doc = XDocument.Load(filePath);
+                    var root = doc.Root;
+                    if (root is null)
+                    {
+                        // XmlNode rootNode = doc.
+                    }
+                }
+                // Save my connection items.
+                else if (v is TabItem { Header: string str2 } item2 && str2 == strMyConnection)
+                {
+                    
+                }
+                // Save play history items.
+                else if (v is TabItem { Header: string str3 } item3 && str3 == strPlayHistory)
+                {
+                    
+                }
+            }
+            */
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -29,11 +30,17 @@ namespace VStreamPlayer.Assets.UserControls
 
         // Using a DependencyProperty as the backing store for InputText.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty InputTextProperty =
-            DependencyProperty.Register(nameof(InputText), typeof(string), typeof(SearchBar), new PropertyMetadata(string.Empty));
+            DependencyProperty.Register(nameof(InputText), typeof(string), typeof(SearchBar), new PropertyMetadata(""));
 
         public SearchBar()
         {
             InitializeComponent();
+            (Content as FrameworkElement).DataContext = this;
+        }
+
+        private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            // Debug.WriteLine(InputText);
         }
     }
 }

@@ -28,6 +28,10 @@
     <ApplicationIcon>Resources\Logo.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Page Remove="Languages\en-us.xaml" />
+    <Page Remove="Languages\zh-cn.xaml" />
+  </ItemGroup>
+  <ItemGroup>
     <Reference Include="System.Windows" />
   </ItemGroup>
   <ItemGroup>
@@ -44,6 +48,8 @@
     <Resource Include="Fonts\Roboto-Regular.ttf" />
     <Resource Include="Fonts\Roboto-Thin.ttf" />
     <Resource Include="Fonts\Roboto-ThinItalic.ttf" />
+    <Resource Include="Languages\en-us.xaml" />
+    <Resource Include="Languages\zh-cn.xaml" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\VStreamPlayer.Convert\VStreamPlayer.Convert.csproj" />
@@ -98,9 +104,6 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="MVVM\Models\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.1.0" />

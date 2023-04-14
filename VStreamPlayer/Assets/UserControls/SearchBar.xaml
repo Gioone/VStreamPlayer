@@ -8,13 +8,11 @@
     Height="30"
     d:DesignHeight="30"
     d:DesignWidth="800"
-    DataContext="{Binding RelativeSource={RelativeSource Self}}"
     mc:Ignorable="d">
-    <TextBox>
+    <!--<TextBox>
         <TextBox.Style>
             <Style TargetType="TextBox">
                 <Style.Setters>
-                    <Setter Property="Text" Value="{Binding InputText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     <Setter Property="CaretBrush" Value="{DynamicResource TextColorBrush}" />
                     <Setter Property="Template">
                         <Setter.Value>
@@ -29,9 +27,14 @@
                                             BorderThickness="0"
                                             CaretBrush="{TemplateBinding CaretBrush}"
                                             Foreground="{DynamicResource TextColorBrush}"
-                                            Text="{TemplateBinding Text}" />
+                                            Text="{TemplateBinding Text}"
+                                            TextChanged="TextBox_TextChanged" />
                                         <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
-                                            <!--  Search icon  -->
+
+    -->
+    <!--  Search icon  -->
+    <!--
+
                                             <Label
                                                 x:Name="SearchIcon"
                                                 Width="20"
@@ -122,5 +125,123 @@
                 </Style.Setters>
             </Style>
         </TextBox.Style>
-    </TextBox>
+    </TextBox>-->
+
+    <Border Background="{DynamicResource SecondaryColorBrush}" CornerRadius="15">
+        <Grid>
+            <TextBox
+                x:Name="Txt"
+                Margin="10,0"
+                Padding="10,0,10,0"
+                VerticalAlignment="Center"
+                Background="Transparent"
+                BorderBrush="{x:Null}"
+                BorderThickness="0"
+                CaretBrush="{DynamicResource TextColorBrush}"
+                Foreground="{DynamicResource TextColorBrush}"
+                Text="{Binding InputText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                <TextBox.Style>
+                    <Style TargetType="TextBox">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding RelativeSource={RelativeSource Self}, Path=Text}" Value="" />
+                        </Style.Triggers>
+                    </Style>
+                </TextBox.Style>
+            </TextBox>
+
+            <StackPanel
+                VerticalAlignment="Center"
+                Panel.ZIndex="999"
+                IsHitTestVisible="False"
+                Orientation="Horizontal">
+
+                <!--  Search icon  -->
+
+                <Label
+                    x:Name="SearchIcon"
+                    Width="20"
+                    Height="20"
+                    Margin="5,0,0,0"
+                    IsHitTestVisible="False"
+                    RenderTransformOrigin=".5,.5">
+                    <Label.RenderTransform>
+                        <TransformGroup>
+                            <TranslateTransform Y="-1" />
+                            <ScaleTransform ScaleX="1.5" ScaleY="1.5" />
+                        </TransformGroup>
+                    </Label.RenderTransform>
+                    <Label.Style>
+                        <Style TargetType="Label">
+                            <Setter Property="Visibility" Value="Hidden" />
+                            <Setter Property="IsHitTestVisible" Value="False" />
+                            <Setter Property="VerticalContentAlignment" Value="Center" />
+                            <Setter Property="HorizontalContentAlignment" Value="Center" />
+                            <Setter Property="Content">
+                                <Setter.Value>
+                                    <Viewbox>
+                                        <Canvas
+                                            Name="svg16"
+                                            Width="20"
+                                            Height="20">
+                                            <Ellipse
+                                                Name="circle12"
+                                                Canvas.Left="3"
+                                                Canvas.Top="3"
+                                                Width="16"
+                                                Height="16"
+                                                Stroke="{DynamicResource TextColorBrushLight}"
+                                                StrokeEndLineCap="Round"
+                                                StrokeLineJoin="Round"
+                                                StrokeStartLineCap="Round"
+                                                StrokeThickness="2" />
+                                            <Line
+                                                Name="line14"
+                                                Stroke="{DynamicResource TextColorBrushLight}"
+                                                StrokeEndLineCap="Round"
+                                                StrokeLineJoin="Round"
+                                                StrokeStartLineCap="Round"
+                                                StrokeThickness="2"
+                                                X1="21"
+                                                X2="16.65"
+                                                Y1="21"
+                                                Y2="16.65" />
+                                        </Canvas>
+                                    </Viewbox>
+                                </Setter.Value>
+                            </Setter>
+
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ElementName=Txt, Path=Text, Mode=OneWay}" Value="">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                            </Style.Triggers>
+
+                        </Style>
+
+                    </Label.Style>
+                </Label>
+                <TextBlock
+                    Margin="5,0,0,0"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    FontSize="14"
+                    Foreground="{DynamicResource TextColorBrushLight}"
+                    IsHitTestVisible="False"
+                    Text="{DynamicResource HintSearchString}">
+                    <TextBlock.Style>
+                        <Style TargetType="{x:Type TextBlock}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ElementName=Txt, Path=Text, Mode=OneWay}" Value="">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                            <Setter Property="Visibility" Value="Hidden" />
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </StackPanel>
+        </Grid>
+
+    </Border>
+
 </UserControl>

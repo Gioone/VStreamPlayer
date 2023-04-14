@@ -6,6 +6,7 @@
     xmlns:local="clr-namespace:VStreamPlayer.TestWindow"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:userControls="clr-namespace:VStreamPlayer.Assets.UserControls"
+    xmlns:views="clr-namespace:VStreamPlayer.MVVM.Views"
     Title="TestWindow"
     Width="800"
     Height="450"
@@ -105,10 +106,6 @@
 
 
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition />
-        </Grid.RowDefinitions>
-        <userControls:TestSlider />
-
+        <views:PlayListItemCollectionViewNew />
     </Grid>
 </Window>

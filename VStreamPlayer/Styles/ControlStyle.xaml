@@ -36,6 +36,7 @@
             Background="{TemplateBinding Background}"
             BorderBrush="{TemplateBinding BorderBrush}"
             BorderThickness="{TemplateBinding BorderThickness}"
+            Focusable="False"
             SnapsToDevicePixels="True">
             <Grid>
                 <Grid.RowDefinitions>
@@ -43,6 +44,7 @@
                     <RowDefinition Height="Auto" MinHeight="{TemplateBinding MinHeight}" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
+                <!--  Top graduation  -->
                 <TickBar
                     x:Name="TopTick"
                     Grid.Row="0"
@@ -52,6 +54,7 @@
                     Placement="Top"
                     Visibility="Collapsed" />
 
+                <!--  Bottom graduation  -->
                 <TickBar
                     x:Name="BottomTick"
                     Grid.Row="2"
@@ -69,7 +72,8 @@
                     VerticalAlignment="center"
                     Background="{TemplateBinding Background}"
                     BorderBrush="Transparent"
-                    BorderThickness="0">
+                    BorderThickness="0"
+                    Focusable="False">
                     <Canvas Margin="-6,-1">
                         <Rectangle
                             x:Name="PART_SelectionRange"
@@ -82,10 +86,12 @@
                 <Track x:Name="PART_Track" Grid.Row="1">
                     <Track.DecreaseRepeatButton>
                         <RepeatButton
+                            x:Name="DcsBtn"
                             Height="4"
                             Background="{DynamicResource MainColorBrush}"
                             BorderThickness="0"
-                            Command="{x:Static Slider.DecreaseLarge}">
+                            Command="{x:Static Slider.DecreaseLarge}"
+                            Focusable="False">
                             <RepeatButton.Style>
                                 <Style TargetType="RepeatButton">
                                     <Setter Property="Template">
@@ -112,10 +118,12 @@
 
                     <Track.IncreaseRepeatButton>
                         <RepeatButton
+                            x:Name="IcsBtn"
                             Height="4"
                             Background="{DynamicResource ThirdColorBrush}"
                             BorderThickness="0"
-                            Command="{x:Static Slider.IncreaseLarge}">
+                            Command="{x:Static Slider.IncreaseLarge}"
+                            Focusable="False">
                             <RepeatButton.Style>
                                 <Style TargetType="RepeatButton">
                                     <Setter Property="Template">
@@ -140,6 +148,7 @@
                         </RepeatButton>
                     </Track.IncreaseRepeatButton>
 
+                    <!--  Slider circle  -->
                     <Track.Thumb>
                         <Thumb
                             x:Name="Thumb"
@@ -148,6 +157,7 @@
                             OverridesDefaultStyle="True">
                             <Thumb.Style>
                                 <Style TargetType="Thumb">
+                                    <Setter Property="Background" Value="Transparent" />
                                     <Setter Property="Width" Value="8" />
                                     <Setter Property="Height" Value="8" />
                                     <Setter Property="BorderThickness" Value="1" />
@@ -175,7 +185,12 @@
                 </Track>
             </Grid>
         </Border>
+
         <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="IcsBtn" Property="Height" Value="8" />
+                <Setter TargetName="DcsBtn" Property="Height" Value="8" />
+            </Trigger>
             <!--<Trigger Property="TickPlacement" Value="TopLeft">
                     <Setter TargetName="TopTick" Property="Visibility" Value="Visible" />
 
@@ -195,6 +210,7 @@
             <!--<Trigger Property="IsKeyboardFocused" Value="true">
                     <Setter TargetName="Thumb" Property="Foreground" Value="Blue" />
                 </Trigger>-->
+
 
         </ControlTemplate.Triggers>
     </ControlTemplate>

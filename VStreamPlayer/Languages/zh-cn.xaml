@@ -6,5 +6,5 @@
     <system:String x:Key="WindowTitleCloseString">退出 VStream player</system:String>
     <system:String x:Key="WindowTitleMaximizeString">最大化/还原窗口</system:String>
     <system:String x:Key="NotSupportVideoFormat">不支持的视频格式...</system:String>
-
+    <system:String x:Key="SettingsString" xml:space="preserve">设置</system:String>
 </ResourceDictionary>

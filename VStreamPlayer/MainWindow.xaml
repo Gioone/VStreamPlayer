@@ -14,9 +14,11 @@
     Height="400"
     MinWidth="550"
     MinHeight="300"
+    AllowDrop="True"
     AllowsTransparency="True"
     Background="{DynamicResource WindowBackColor}"
     DataContext="{Binding RelativeSource={RelativeSource Self}}"
+    Drop="Window_Drop"
     KeyDown="Window_KeyDown"
     Loaded="Window_Loaded"
     MouseLeftButtonDown="Window_MouseLeftButtonDown"
@@ -38,20 +40,28 @@
         <!--  Menu  -->
         <ContextMenu x:Key="MyMenu">
             <ContextMenu.Style>
-                <Style TargetType="ContextMenu">
-
-                </Style>
+                <Style TargetType="ContextMenu" />
             </ContextMenu.Style>
 
             <MenuItem Header="打开文件" />
             <Separator />
-            <MenuItem Header="视频" />
+            <MenuItem Header="视频">
+                <MenuItem Header="水平翻转" />
+                <MenuItem Header="垂直翻转" />
+                <MenuItem Header="视频旋转">
+                    <MenuItem Header="旋转90°" Click="MenuItemRotate90_Click" />
+                    <MenuItem Header="旋转180°" />
+                    <MenuItem Header="旋转270°" />
+                    <MenuItem Header="旋转任意度数" />
+                </MenuItem>
+            </MenuItem>
             <Separator />
+            <!--  Volume plus, volume sub, volume mute  -->
             <MenuItem Header="音量" />
             <Separator />
             <MenuItem Header="截图" />
             <Separator />
-            <MenuItem Header="全屏" />
+            <MenuItem Header="全屏" Click="MenuItemMaximize_Click" />
             <Separator />
             <MenuItem Header="播放列表" />
             <Separator />
@@ -123,7 +133,8 @@
                 <ToggleButton
                     x:Name="TglBtnOnTop"
                     Click="TglBtnOnTop_Click"
-                    Style="{DynamicResource TitlePinnedPinnedOffToggleButtonStyle}" />
+                    Style="{DynamicResource TitlePinnedPinnedOffToggleButtonStyle}"
+                    ToolTipService.InitialShowDelay="50" />
 
                 <!--  Minimized Button  -->
                 <Button
@@ -131,7 +142,8 @@
                     Margin="10,0,0,0"
                     Click="BtnMinimize_Click"
                     Style="{DynamicResource TitleMinimizeButtonStyle}"
-                    ToolTip="{DynamicResource WindowTitleMinimumString}">
+                    ToolTip="{DynamicResource WindowTitleMinimumString}"
+                    ToolTipService.InitialShowDelay="50">
                     <Viewbox Stretch="Uniform">
                         <Path
                             Data="M0 9.5v-3H42v3Z"
@@ -146,7 +158,8 @@
                 <Button
                     x:Name="BtnWindowed"
                     Click="BtnWindowed_Click"
-                    Style="{DynamicResource TitleWindowedButtonStyle}" />
+                    Style="{DynamicResource TitleWindowedButtonStyle}"
+                    ToolTipService.InitialShowDelay="50" />
 
                 <!--  Maximized Button  -->
                 <Button
@@ -154,7 +167,8 @@
                     Margin="5,0,0,0"
                     Click="BtnMax_Click"
                     Style="{DynamicResource TitleMaximizeButtonStyle}"
-                    ToolTip="{DynamicResource WindowTitleMaximizeOrRestoreString}" />
+                    ToolTip="{DynamicResource WindowTitleMaximizeOrRestoreString}"
+                    ToolTipService.InitialShowDelay="50" />
 
                 <!--  Close Button  -->
                 <Button
@@ -162,7 +176,8 @@
                     Margin="5,0,0,0"
                     Click="BtnClose_Click"
                     Style="{DynamicResource TitleCloseButtonStyle}"
-                    ToolTip="{DynamicResource WindowTitleCloseString}" />
+                    ToolTip="{DynamicResource WindowTitleCloseString}"
+                    ToolTipService.InitialShowDelay="50" />
             </StackPanel>
         </Grid>
 
@@ -189,12 +204,21 @@
             <MediaElement
                 x:Name="MediaMain"
                 Panel.ZIndex="1"
+                IsMuted="{Binding IsMuted, Mode=OneWay}"
                 LoadedBehavior="Manual"
                 MediaEnded="MediaMain_MediaEnded"
                 MediaFailed="MediaMain_MediaFailed"
                 MediaOpened="MediaMain_MediaOpened"
                 PreviewMouseLeftButtonDown="MediaMain_MouseLeftButtonDown"
-                Volume=".5" />
+                RenderTransformOrigin=".5,.5"
+                Volume=".5">
+                <MediaElement.RenderTransform>
+                    <TransformGroup>
+                        <RotateTransform />
+                        <ScaleTransform />
+                    </TransformGroup>
+                </MediaElement.RenderTransform>
+            </MediaElement>
         </Grid>
 
         <!--  Functionality area  -->
@@ -207,12 +231,23 @@
                 <RowDefinition />
             </Grid.RowDefinitions>
 
+            <!--  Display video thumbnail  -->
+            <Popup
+                x:Name="PopVideoThumb"
+                IsOpen="False"
+                Placement="Mouse"
+                StaysOpen="True" />
+
             <Slider
                 x:Name="ProgressSlider"
                 d:Maximum="100"
                 d:Minimum="0"
                 d:Value="50"
+                Cursor="Hand"
+                Focusable="False"
                 IsMoveToPointEnabled="False"
+                MouseLeave="ProgressSlider_MouseLeave"
+                MouseMove="ProgressSlider_MouseMove"
                 Template="{DynamicResource SliderHorizontal}"
                 Thumb.DragCompleted="MediaSlider_DragCompleted"
                 Thumb.DragStarted="MediaSlider_DragStarted"
@@ -254,9 +289,13 @@
                     </StackPanel.RenderTransform>
 
                     <!--  Playback order button  -->
-                    <Button x:Name="BtnPlaybackOrder" Click="BtnPlaybackOrder_Click">
+                    <Button
+                        x:Name="BtnPlaybackOrder"
+                        Click="BtnPlaybackOrder_Click"
+                        ToolTipService.InitialShowDelay="50">
                         <Button.Style>
                             <Style TargetType="Button">
+                                <Setter Property="ToolTip" Value="{DynamicResource SingleLoopString}" />
                                 <Setter Property="Focusable" Value="False" />
                                 <Setter Property="FocusVisualStyle" Value="{x:Null}" />
                                 <Setter Property="Width" Value="16" />
@@ -279,6 +318,7 @@
 
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=local:MainWindow}, Path=PlaybackOrder, Converter={StaticResource PlaybackOrderConverter}}" Value="Random play">
+                                        <Setter Property="ToolTip" Value="{DynamicResource RandomPlayString}" />
                                         <Setter Property="Template">
                                             <Setter.Value>
                                                 <ControlTemplate TargetType="Button">
@@ -295,6 +335,7 @@
                                     </DataTrigger>
 
                                     <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=local:MainWindow}, Path=PlaybackOrder, Converter={StaticResource PlaybackOrderConverter}}" Value="Sequential play">
+                                        <Setter Property="ToolTip" Value="{DynamicResource SequentialPlayString}" />
                                         <Setter Property="Template">
                                             <Setter.Value>
                                                 <ControlTemplate TargetType="Button">
@@ -320,7 +361,8 @@
                         Click="BtnMultiplyPlayBackward_Click"
                         MouseRightButtonDown="BtnMultiplyPlayBackward_MouseRightButtonDown"
                         RenderTransformOrigin=".5,.5"
-                        Style="{DynamicResource MultiplySpeedPlayBackwardButtonStyle}">
+                        Style="{DynamicResource MultiplySpeedPlayBackwardButtonStyle}"
+                        ToolTipService.InitialShowDelay="50">
                         <Button.RenderTransform>
                             <ScaleTransform ScaleX="-1" />
                         </Button.RenderTransform>
@@ -329,8 +371,10 @@
                     <Button
                         x:Name="BtnBackward"
                         Margin="15,0,0,0"
+                        Click="BtnBackward_Click"
                         RenderTransformOrigin=".5,.5"
-                        Style="{DynamicResource NextButtonStyle}">
+                        Style="{DynamicResource NextButtonStyle}"
+                        ToolTipService.InitialShowDelay="50">
                         <Button.RenderTransform>
                             <ScaleTransform ScaleX="-1" />
                         </Button.RenderTransform>
@@ -340,23 +384,31 @@
                         x:Name="BtnPlayAndPause"
                         Margin="15,0,0,0"
                         Click="BtnPlayAndPause_Click"
-                        Style="{DynamicResource PlayPauseToggleButtonStyle}" />
+                        Style="{DynamicResource PlayPauseToggleButtonStyle}"
+                        ToolTipService.InitialShowDelay="50" />
                     <!--<Button Margin="15,0,0,0" Style="{DynamicResource PauseButtonStyle}" />-->
 
-                    <Button Margin="15,0,0,0" Style="{DynamicResource NextButtonStyle}" />
+                    <Button
+                        x:Name="BtnNext"
+                        Margin="15,0,0,0"
+                        Click="BtnNext_Click"
+                        Style="{DynamicResource NextButtonStyle}"
+                        ToolTipService.InitialShowDelay="50" />
 
                     <Button
                         x:Name="BtnStop"
                         Margin="15,0,0,0"
                         Click="BtnStop_Click"
-                        Style="{DynamicResource StopButtonStyle}" />
+                        Style="{DynamicResource StopButtonStyle}"
+                        ToolTipService.InitialShowDelay="50" />
 
                     <Button
                         x:Name="BtnMultiplyPlayForward"
                         Margin="15,0,0,0"
                         Click="BtnMultiplyPlayForward_Click"
                         MouseRightButtonDown="BtnMultiplyPlayForward_MouseRightButtonDown"
-                        Style="{DynamicResource MultiplySpeedPlayBackwardButtonStyle}" />
+                        Style="{DynamicResource MultiplySpeedPlayBackwardButtonStyle}"
+                        ToolTipService.InitialShowDelay="50" />
                 </StackPanel>
 
                 <!--  Volume, Settings, Play list...  -->
@@ -370,13 +422,17 @@
 
                     <!--  Volume  -->
                     <StackPanel Orientation="Horizontal">
-                        <ToggleButton Style="{StaticResource MuteUnmuteToggleButtonStyle}" />
+                        <ToggleButton
+                            IsChecked="{Binding IsMuted, Mode=TwoWay}"
+                            Style="{StaticResource MuteUnmuteToggleButtonStyle}"
+                            ToolTipService.InitialShowDelay="50" />
 
                         <Slider
                             x:Name="PbVolume"
                             Width="100"
                             Margin="5,0,0,0"
                             VerticalAlignment="Center"
+                            Cursor="Hand"
                             IsMoveToPointEnabled="True"
                             Maximum="1"
                             Minimum="0"
@@ -396,7 +452,8 @@
                         Margin="10,0,0,0"
                         HorizontalAlignment="Center"
                         Click="BtnSettings_Click"
-                        Style="{DynamicResource SettingsButtonStyle}" />
+                        Style="{DynamicResource SettingsButtonStyle}"
+                        ToolTipService.InitialShowDelay="50" />
 
                     <!--  Play list  -->
                     <Button
@@ -404,7 +461,8 @@
                         Margin="10,0,10,0"
                         HorizontalAlignment="Center"
                         Click="Button_Click"
-                        Style="{DynamicResource PlayListStyle}" />
+                        Style="{DynamicResource PlayListStyle}"
+                        ToolTipService.InitialShowDelay="50" />
                 </Grid>
             </Grid>
         </Grid>

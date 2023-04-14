@@ -9,6 +9,7 @@
     Title="PlayListView"
     Width="600"
     Height="400"
+    Closing="Window_Closing"
     MinWidth="500"
     Background="Transparent"
     DataContext="{Binding RelativeSource={RelativeSource Self}}"
@@ -199,15 +200,13 @@
             <TabItem Header="{DynamicResource MyConnectionString}">
                 <Label />
             </TabItem>
-            <TabItem Header="{DynamicResource LocalDiskString}">
-
+            <TabItem Header="{DynamicResource PlayHistoryString}">
                 <Label />
-
             </TabItem>
         </TabControl>
 
         <Grid Grid.Row="1" Background="{DynamicResource TextColorBrushLight}">
-            <userControls:SearchBar x:Name="UserSearchBar" InputText="{Binding SearchText, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
+            <userControls:SearchBar x:Name="UserSearchBar" InputText="{Binding SearchText, UpdateSourceTrigger=PropertyChanged, Mode=OneWayToSource}">
                 <userControls:SearchBar.Style>
                     <Style TargetType="userControls:SearchBar">
                         <Setter Property="Margin" Value="5" />
