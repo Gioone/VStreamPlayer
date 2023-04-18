@@ -7,7 +7,9 @@
     <system:String x:Key="WindowTitleMaximizeOrRestoreString">Maximize/Restore window</system:String>
     <system:String x:Key="WindowTitleMinimumString">Minimum window</system:String>
     <system:String x:Key="WindowTitleOnTopString">Set window on-top</system:String>
+    <system:String x:Key="WindowTitleWindowed">Set window windowed</system:String>
     <system:String x:Key="WindowTitleNotOnTopString">Set window not on-top</system:String>
+
     <system:String x:Key="NotSupportVideoFormat">Invalid video format...</system:String>
     <system:String x:Key="OpenFile">Open file</system:String>
     <system:String x:Key="Information">Information</system:String>
@@ -25,6 +27,15 @@
     <system:String x:Key="SettingsString" xml:space="preserve">Settings</system:String>
     <system:String x:Key="AboutString" xml:space="preserve">About</system:String>
     <system:String x:Key="SequentialPlayString">Sequential Play</system:String>
-    <system:String x:Key="SingleLoopString">Single lopp</system:String>
+    <system:String x:Key="SingleLoopString">Single loop</system:String>
     <system:String x:Key="RandomPlayString">Random play</system:String>
+
+    <system:String x:Key="DeceleratePlaybackString">Multiply speed playback (deceleration)\nRight-click to restore</system:String>
+    <system:String x:Key="AcceleratePlaybackString">Multiply speed playback (Acceleration)\nRight-click to restore</system:String>
+    <system:String x:Key="PreviousString">Previous</system:String>
+    <system:String x:Key="NextString">Next</system:String>
+    <system:String x:Key="PlayString">Play</system:String>
+    <system:String x:Key="PauseString">Pause</system:String>
+    <system:String x:Key="StopString">Stop</system:String>
+
 </ResourceDictionary>

@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -7,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Shapes;
 
 namespace VStreamPlayer.MVVM.Models
 {
@@ -22,17 +24,26 @@ namespace VStreamPlayer.MVVM.Models
         /// Background
         /// </summary>
         [ObservableProperty]
+        [JsonIgnore]
         public Brush _background = DefaultBackground;
 
         /// <summary>
         /// Item default background
         /// </summary>
+        [JsonIgnore]
         public static Brush DefaultBackground { get; set; }
 
         /// <summary>
         /// Background of when video is playing
         /// </summary>
+        [JsonIgnore]
         public static Brush PlayingBackground { get; set; }
+
+        /// <summary>
+        /// Add time
+        /// </summary>
+        public DateTime AddTime
+        { get; set; }
 
         /// <summary>
         /// Video path.
@@ -45,12 +56,14 @@ namespace VStreamPlayer.MVVM.Models
         /// <summary>
         /// An order to display.
         /// </summary>
-        [ObservableProperty] 
+        [ObservableProperty]
+        [JsonIgnore]
         public int _order;
 
         /// <summary>
         /// Video thumb image
         /// </summary>
+        [JsonIgnore]
         public ImageSource Thumb
         {
             get; set;
@@ -77,7 +90,7 @@ namespace VStreamPlayer.MVVM.Models
         /// <summary>
         /// Video size
         /// </summary>
-        public string Size
+        public decimal Size
         {
             get;
             set;
@@ -113,7 +126,7 @@ namespace VStreamPlayer.MVVM.Models
             task.Wait();
             if (!task.Result)
             {
-                throw new FileFormatException();
+                throw new FileNotFoundException();
             }
 
             Task<string> formats = Task.Run(() => FFMpeg.FFMpegHelper.GetVideoFormat(path));
@@ -133,11 +146,35 @@ namespace VStreamPlayer.MVVM.Models
             // Thumb = new SWC.Image();
             // Thumb.Source = bs;
 
-            string strTitle = Path.GetFileNameWithoutExtension(path);
+            string strTitle = System.IO.Path.GetFileNameWithoutExtension(path);
             Title = strTitle;
 
             decimal dFileLength = GetFileLength(path);
-            Size = dFileLength + "";
+            Size = dFileLength;
+
+            AddTime = DateTime.Now;
+        }
+
+        public PlayListItemModel(DateTime addTime, string videoPath, int order, string title, string duration, decimal size, string format)
+        {
+            Task<bool> taskIsExisted = Task.Run(() => Core.HelperUtils.CheckIsValidVideo(videoPath));
+            taskIsExisted.Wait();
+            if (!taskIsExisted.Result)
+            {
+                throw new FileNotFoundException();
+            }
+
+            AddTime = addTime;
+            VideoPath = videoPath;
+            Order = order;
+            Title = title;
+            Duration = duration;
+            Size = size;
+            Format = format;
+
+            BitmapSource bs = VStreamPlayer.Helper.Media.GetThumbnailByPath(videoPath);
+
+            Thumb = bs;
         }
 
         /// <summary>

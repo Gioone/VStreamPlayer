@@ -78,8 +78,6 @@ namespace VStreamPlayer.Window.MessageBox
             InitializeComponent();
         }
 
-
-
         private void BtnClose_Click(object sender, RoutedEventArgs e)
         {
             Close();

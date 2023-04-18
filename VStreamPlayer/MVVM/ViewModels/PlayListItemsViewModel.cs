@@ -20,11 +20,12 @@ namespace VStreamPlayer.MVVM.ViewModels
 
         private void InitTestDatas()
         {
+            /*
             for (int i = 0; i < 10; i++)
             {
                 AddItem(new PlayListItemModel(@"D:\马斯托鸡你太美.mp4"));
             }
-
+            */
         }
 
         public bool DeleteItems(List<PlayListItemModel> models)

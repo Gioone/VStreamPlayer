@@ -7,24 +7,32 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Width="{Binding WidthAndHeight}"
     Height="{Binding WidthAndHeight}"
+    d:Height="20"
+    d:Width="20"
     DataContext="{Binding RelativeSource={RelativeSource Self}}"
     mc:Ignorable="d">
     <Grid>
         <Viewbox Stretch="Uniform">
-            <Canvas Width="{Binding WidthAndHeight}" Height="{Binding WidthAndHeight}">
+            <Canvas
+                Width="{Binding WidthAndHeight}"
+                Height="{Binding WidthAndHeight}"
+                d:Height="20"
+                d:Width="20">
                 <Ellipse
                     Width="20"
                     Height="20"
+                    d:Stroke="White"
                     Stroke="{Binding Color}"
                     StrokeEndLineCap="Round"
                     StrokeLineJoin="Round"
                     StrokeStartLineCap="Round"
-                    StrokeThickness="2" />
+                    StrokeThickness="1.5" />
                 <Line
                     Canvas.Left="-2"
                     Canvas.Top="-2"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Top"
+                    d:Stroke="White"
                     Stroke="{Binding Color}"
                     StrokeEndLineCap="Round"
                     StrokeLineJoin="Round"
@@ -39,6 +47,7 @@
                     Canvas.Top="-2"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Top"
+                    d:Stroke="White"
                     Stroke="{Binding Color}"
                     StrokeEndLineCap="Round"
                     StrokeLineJoin="Round"

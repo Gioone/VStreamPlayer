@@ -1,0 +1,38 @@
+﻿<UserControl
+    x:Class="VStreamPlayer.Assets.UserControls.Sort"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:VStreamPlayer.Assets.UserControls"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Width="{Binding WidthAndHeight}"
+    Height="{Binding WidthAndHeight}"
+    d:DesignHeight="50"
+    d:DesignWidth="50"
+    DataContext="{Binding RelativeSource={RelativeSource Self}}"
+    mc:Ignorable="d">
+    <Viewbox Stretch="Uniform">
+        <Canvas
+            Name="svg12"
+            Width="1024"
+            Height="1024">
+            <Ellipse
+                Width="1024"
+                Height="1024"
+                d:Stroke="White"
+                Stroke="{Binding Color}"
+                StrokeThickness="80" />
+            <Path
+                Name="path10"
+                d:Fill="White"
+                Data="m 269.69129 183.168 a 42.589537 42.743937 45.051835 0 1 60.33067 0 l 170.04907 170.66667 a 42.589537 42.743937 45.051835 0 1 -60.54899 60.33066 l -97.48063 -97.83466 -1.78888 494.336 a 42.589537 42.743937 45.051835 1 1 -85.33333 0 l 1.78888 -494.336 -98.18871 97.83466 A 42.589537 42.743937 45.051835 0 1 98.407028 353.83467 Z m 412.2673 524.50133 1.78888 -494.336 a 42.589537 42.743937 45.051835 1 1 85.33333 0 l -1.78888 494.336 98.18871 -97.83466 a 42.589537 42.743937 45.051835 0 1 60.11234 60.33066 L 754.30871 840.832 a 42.589537 42.743937 45.051835 0 1 -60.33067 0 L 523.92897 670.16533 a 42.589537 42.743937 45.051835 0 1 60.54899 -60.33066 z"
+                Fill="{Binding Color}"
+                RenderTransformOrigin=".5,.5">
+                <Path.RenderTransform>
+                    <ScaleTransform ScaleX=".8" ScaleY=".8" />
+                </Path.RenderTransform>
+            </Path>
+        </Canvas>
+    </Viewbox>
+
+</UserControl>

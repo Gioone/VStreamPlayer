@@ -2,6 +2,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:userControls="clr-namespace:VStreamPlayer.Assets.UserControls"
+    xmlns:valueConverter="clr-namespace:VStreamPlayer.Convert.ValueConverter;assembly=VStreamPlayer.Convert"
     xmlns:window="clr-namespace:VStreamPlayer">
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="./ProgressBarstyle.xaml" />
@@ -28,7 +29,195 @@
         </Setter>
     </Style>
 
+    <ControlTemplate x:Key="SliderHorizontalVolume" TargetType="{x:Type Slider}">
+        <ControlTemplate.Resources>
+            <valueConverter:VolumeConverter x:Key="VolumeConverter" />
+        </ControlTemplate.Resources>
 
+        <Border
+            x:Name="border"
+            Background="{TemplateBinding Background}"
+            BorderBrush="{TemplateBinding BorderBrush}"
+            BorderThickness="{TemplateBinding BorderThickness}"
+            Focusable="False"
+            SnapsToDevicePixels="True">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" MinHeight="{TemplateBinding MinHeight}" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <!--  Top graduation  -->
+                <TickBar
+                    x:Name="TopTick"
+                    Grid.Row="0"
+                    Height="4"
+                    Margin="0,0,0,2"
+                    Fill="{TemplateBinding Foreground}"
+                    Placement="Top"
+                    Visibility="Collapsed" />
+
+                <!--  Bottom graduation  -->
+                <TickBar
+                    x:Name="BottomTick"
+                    Grid.Row="2"
+                    Height="4"
+                    Margin="0,2,0,0"
+                    Fill="{TemplateBinding Foreground}"
+                    Placement="Bottom"
+                    Visibility="Collapsed" />
+
+                <Border
+                    x:Name="TrackBackground"
+                    Grid.Row="1"
+                    Height="4"
+                    Margin="5,0"
+                    VerticalAlignment="center"
+                    Background="{TemplateBinding Background}"
+                    BorderBrush="Transparent"
+                    BorderThickness="0"
+                    Focusable="False">
+                    <Canvas Margin="-6,-1">
+                        <Rectangle
+                            x:Name="PART_SelectionRange"
+                            Height="4.0"
+                            Fill="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"
+                            Visibility="Collapsed" />
+                    </Canvas>
+                </Border>
+
+                <Track x:Name="PART_Track" Grid.Row="1">
+                    <Track.DecreaseRepeatButton>
+                        <RepeatButton
+                            x:Name="DcsBtn"
+                            Height="4"
+                            Background="{DynamicResource MainColorBrush}"
+                            BorderThickness="0"
+                            Command="{x:Static Slider.DecreaseLarge}"
+                            Focusable="False">
+                            <RepeatButton.Style>
+                                <Style TargetType="RepeatButton">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="RepeatButton">
+                                                <Border
+                                                    Width="{TemplateBinding Width}"
+                                                    Height="{TemplateBinding Height}"
+                                                    Background="{TemplateBinding Background}">
+                                                    <!--  轨迹，设置Background  -->
+                                                    <Border
+                                                        Height="4.0"
+                                                        Margin="0,0,-1,0"
+                                                        VerticalAlignment="center"
+                                                        Background="{TemplateBinding Background}" />
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </RepeatButton.Style>
+                        </RepeatButton>
+                    </Track.DecreaseRepeatButton>
+
+                    <Track.IncreaseRepeatButton>
+                        <RepeatButton
+                            x:Name="IcsBtn"
+                            Height="4"
+                            Background="{DynamicResource ThirdColorBrush}"
+                            BorderThickness="0"
+                            Command="{x:Static Slider.IncreaseLarge}"
+                            Focusable="False">
+                            <RepeatButton.Style>
+                                <Style TargetType="RepeatButton">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="RepeatButton">
+                                                <Border
+                                                    Width="{TemplateBinding Width}"
+                                                    Height="{TemplateBinding Height}"
+                                                    Background="{TemplateBinding Background}">
+                                                    <!--  轨迹，设置Background  -->
+                                                    <Border
+                                                        Height="4.0"
+                                                        Margin="-1,0,0,0"
+                                                        VerticalAlignment="center"
+                                                        Background="{TemplateBinding Background}" />
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </RepeatButton.Style>
+                        </RepeatButton>
+                    </Track.IncreaseRepeatButton>
+
+                    <!--  Slider circle  -->
+                    <Track.Thumb>
+                        <Thumb
+                            x:Name="Thumb"
+                            VerticalAlignment="Center"
+                            Focusable="False"
+                            OverridesDefaultStyle="True">
+                            <Thumb.Style>
+                                <Style TargetType="Thumb">
+                                    <Setter Property="Background" Value="Transparent" />
+                                    <Setter Property="Width" Value="8" />
+                                    <Setter Property="Height" Value="8" />
+                                    <Setter Property="BorderThickness" Value="1" />
+                                    <Setter Property="BorderBrush" Value="{DynamicResource FourthColorBrush}" />
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="Thumb">
+                                                <Grid>
+                                                    <Ellipse
+                                                        Width="8"
+                                                        Height="8"
+                                                        Fill="{TemplateBinding BorderBrush}" />
+                                                    <Ellipse
+                                                        Width="6"
+                                                        Height="6"
+                                                        Fill="{DynamicResource MainColorBrush}" />
+                                                </Grid>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </Thumb.Style>
+                        </Thumb>
+                    </Track.Thumb>
+                </Track>
+            </Grid>
+        </Border>
+
+        <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="IcsBtn" Property="Height" Value="8" />
+                <Setter TargetName="DcsBtn" Property="Height" Value="8" />
+                <Setter Property="ToolTip" Value="{Binding RelativeSource={RelativeSource Self}, Path=Value, Mode=OneWay, Converter={StaticResource VolumeConverter}}" />
+            </Trigger>
+            <!--<Trigger Property="TickPlacement" Value="TopLeft">
+                    <Setter TargetName="TopTick" Property="Visibility" Value="Visible" />
+
+                    <Setter TargetName="TrackBackground" Property="Margin" Value="5,2,5,0" />
+                </Trigger>-->
+            <!--<Trigger Property="TickPlacement" Value="BottomRight">
+                    <Setter TargetName="BottomTick" Property="Visibility" Value="Visible" />
+                    <Setter TargetName="TrackBackground" Property="Margin" Value="5,0,5,2" />
+                </Trigger>-->
+            <!--<Trigger Property="TickPlacement" Value="Both">
+                    <Setter TargetName="TopTick" Property="Visibility" Value="Visible" />
+                    <Setter TargetName="BottomTick" Property="Visibility" Value="Visible" />
+                </Trigger>-->
+            <!--<Trigger Property="IsSelectionRangeEnabled" Value="true">
+                    <Setter TargetName="PART_SelectionRange" Property="Visibility" Value="Visible" />
+                </Trigger>-->
+            <!--<Trigger Property="IsKeyboardFocused" Value="true">
+                    <Setter TargetName="Thumb" Property="Foreground" Value="Blue" />
+                </Trigger>-->
+
+
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
 
     <ControlTemplate x:Key="SliderHorizontal" TargetType="{x:Type Slider}">
         <Border
@@ -611,6 +800,7 @@
         <Style.Triggers>
             <!--  Pause status  -->
             <Trigger Property="IsChecked" Value="False">
+                <Setter Property="ToolTip" Value="{DynamicResource PlayString}" />
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="ToggleButton">
@@ -643,6 +833,7 @@
 
             <!--  Play status  -->
             <Trigger Property="IsChecked" Value="True">
+                <Setter Property="ToolTip" Value="{DynamicResource PauseString}" />
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="ToggleButton">

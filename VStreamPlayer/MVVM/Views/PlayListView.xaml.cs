@@ -1,16 +1,22 @@
-﻿using System.Collections;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Data.OleDb;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Xml;
 using System.Xml.Linq;
+using VStreamPlayer.Assets.UserControls;
 using VStreamPlayer.Core;
 using VStreamPlayer.MVVM.Models;
 using VStreamPlayer.MVVM.ViewModels;
@@ -183,8 +189,8 @@ namespace VStreamPlayer.MVVM.Views
             if (tab.Header is string str1 && str1 == strPlayList)
             {
                 vm2 = PlayListContents.DataContext as PlayListItemsViewModel;
-                
-            } 
+
+            }
             else if (tab.Header is string str2 && str2 == strMyCollection)
             {
                 vm2 = MyCollectionContents.DataContext as PlayListItemsViewModel;
@@ -195,8 +201,8 @@ namespace VStreamPlayer.MVVM.Views
             }
 
             IEnumerable<PlayListItemModel> res = from p in vm2.Contents
-                where p.Title.Contains(value)
-                select p;
+                                                 where p.Title.Contains(value)
+                                                 select p;
 
             var tmpVm = TmpContents.DataContext as PlayListItemsViewModel;
             tmpVm.Contents.Clear();
@@ -220,6 +226,93 @@ namespace VStreamPlayer.MVVM.Views
             CurrentPlayList = PlayListContents;
 
             InitManually();
+            LoadDatas();
+        }
+
+        private void LoadDatas()
+        {
+            string filePath = Path.Combine(System.Windows.Forms.Application.StartupPath, "Data", "PlayList.json");
+            if (!File.Exists(filePath)) return;
+
+            string json = File.ReadAllText(filePath);
+
+            var root = JArray.Parse(json);
+
+            var playListJson = root[0];
+            var myConnectionJson = root[1];
+            var playHistoryJson = root[2];
+
+            List<PlayListItemModel> playList = new();
+            List<PlayListItemModel> myConnection = new();
+            List<PlayListItemModel> playHistory = new();
+
+            var vmPlayList = PlayListContents.DataContext as PlayListItemsViewModel;
+            var vmMyConnection = MyCollectionContents.DataContext as PlayListItemsViewModel;
+            var vmPlayHistory = PlayHistoryContents.DataContext as PlayListItemsViewModel;
+
+
+            foreach (var v in playListJson)
+            {
+                DateTime time = System.Convert.ToDateTime((string)v["AddTime"]);
+                string path = (string)v["VideoPath"];
+                int iOrder = (int)v["Order"];
+                string strTitle = (string)v["Title"];
+                string strDuration = (string)v["Duration"];
+                decimal mSize = (decimal)v["Size"];
+                string strFormat = (string)v["Format"];
+
+                try
+                {
+                    var item = new PlayListItemModel(time, path, iOrder, strTitle, strDuration, mSize, strFormat);
+                    vmPlayList.AddItem(item);
+                }
+                catch (FileNotFoundException)
+                {
+
+                }
+            }
+
+            foreach (var v in myConnectionJson)
+            {
+                DateTime time = System.Convert.ToDateTime((string)v["AddTime"]);
+                string path = (string)v["VideoPath"];
+                int iOrder = (int)v["Order"];
+                string strTitle = (string)v["Title"];
+                string strDuration = (string)v["Duration"];
+                decimal mSize = (decimal)v["Size"];
+                string strFormat = (string)v["Format"];
+
+                try
+                {
+                    var item = new PlayListItemModel(time, path, iOrder, strTitle, strDuration, mSize, strFormat);
+                    vmMyConnection.AddItem(item);
+                }
+                catch (FileNotFoundException)
+                {
+
+                }
+            }
+
+            foreach (var v in playHistoryJson)
+            {
+                DateTime time = System.Convert.ToDateTime((string)v["AddTime"]);
+                string path = (string)v["VideoPath"];
+                int iOrder = (int)v["Order"];
+                string strTitle = (string)v["Title"];
+                string strDuration = (string)v["Duration"];
+                decimal mSize = (decimal)v["Size"];
+                string strFormat = (string)v["Format"];
+
+                try
+                {
+                    var item = new PlayListItemModel(time, path, iOrder, strTitle, strDuration, mSize, strFormat);
+                    vmPlayHistory.AddItem(item);
+                }
+                catch (FileNotFoundException)
+                {
+
+                }
+            }
         }
 
         private void InitManually()
@@ -257,7 +350,7 @@ namespace VStreamPlayer.MVVM.Views
 
         private async void Button_Click(object sender, RoutedEventArgs e)
         {
-            
+
             // User clicked play button.
             if (e.OriginalSource is Button { Tag: "Play Button" } btn)
             {
@@ -350,7 +443,7 @@ namespace VStreamPlayer.MVVM.Views
                     }
                 }
             }
-            else if (e.OriginalSource is Button {Tag: "Delete Button"} deleteBtn)
+            else if (e.OriginalSource is Button { Tag: "Delete Button" } deleteBtn)
             {
 
                 TabItem tabItem = PlayList.SelectedItem as TabItem;
@@ -362,7 +455,7 @@ namespace VStreamPlayer.MVVM.Views
                 {
                     PlayListItemModel model = deleteBtn.DataContext as PlayListItemModel;
 
-                    // TODO: BUG：这里可以用来做一个测试，刚开始时单击删除没有任何反应
+                    // TODO: BUG: 这里可以用来做一个测试，刚开始时单击删除没有任何反应
                     var vm = view.DataContext as PlayListItemsViewModel;
 
                     var deletedList = new List<PlayListItemModel>();
@@ -523,7 +616,7 @@ namespace VStreamPlayer.MVVM.Views
                 }
 
             }
-            
+
         }
 
         private void BtnDelete_Click(object sender, RoutedEventArgs e)
@@ -563,7 +656,7 @@ namespace VStreamPlayer.MVVM.Views
                 }
 
             }
-            
+
         }
 
         /// <summary>
@@ -585,7 +678,7 @@ namespace VStreamPlayer.MVVM.Views
             {
                 case PlaybackOrder.SequentialPlay:
                     var res = model.Contents.SingleOrDefault(m => m.Order == (CurrentPlay.Order + 1));
-                    
+
                     NextPlay = res;
                     break;
 
@@ -619,43 +712,229 @@ namespace VStreamPlayer.MVVM.Views
             string strMyConnection = VStreamPlayer.Helper.Resource.FindStringResource("MyConnectionString", "My connection");
             string strPlayHistory = VStreamPlayer.Helper.Resource.FindStringResource("PlayHistoryString", "Play history");
 
-            /*
-            foreach (var v in PlayList.Items)
+
+            string filePath = Path.Combine(System.Windows.Forms.Application.StartupPath, "Data");
+            if (!Directory.Exists(filePath))
             {
-                // Save play list items.
-                if (v is TabItem { Header: string str1 } item1 && str1 == strPlayList)
-                {
-                    string filePath = Path.Combine(System.Windows.Forms.Application.StartupPath, "Data");
-                    if (!Directory.Exists(filePath))
-                    {
-                        Directory.CreateDirectory(filePath);
-                    }
+                Directory.CreateDirectory(filePath);
+            }
 
-                    filePath = Path.Combine(filePath, "PlayList.xml");
-                    if (!File.Exists(filePath))
-                    {
-                        File.Create(filePath);
-                    }
-
-                    XDocument doc = XDocument.Load(filePath);
-                    var root = doc.Root;
-                    if (root is null)
-                    {
-                        // XmlNode rootNode = doc.
-                    }
-                }
-                // Save my connection items.
-                else if (v is TabItem { Header: string str2 } item2 && str2 == strMyConnection)
-                {
-                    
-                }
-                // Save play history items.
-                else if (v is TabItem { Header: string str3 } item3 && str3 == strPlayHistory)
-                {
-                    
-                }
+            filePath = Path.Combine(filePath, "PlayList.json");
+            /*
+            if (!File.Exists(filePath))
+            {
+                File.Create(filePath);
+            }
+            else
+            {
+                File.Delete(filePath);
+                File.Create(filePath);
             }
             */
+
+            var vmPlayList = PlayListContents.DataContext as PlayListItemsViewModel;
+            var vmMyConnection = MyCollectionContents.DataContext as PlayListItemsViewModel;
+            var vmPlayHistory = PlayHistoryContents.DataContext as PlayListItemsViewModel;
+
+            List<PlayListItemModel> list1 = new();
+            List<PlayListItemModel> list2 = new();
+            List<PlayListItemModel> list3 = new();
+
+            foreach (var item in vmPlayList.Contents)
+            {
+                list1.Add(item);
+            }
+
+            foreach (var item in vmMyConnection.Contents)
+            {
+                list2.Add(item);
+            }
+
+            foreach (var item in vmPlayHistory.Contents)
+            {
+                list3.Add(item);
+            }
+
+            List<List<PlayListItemModel>> res = new();
+            res.Add(list1);
+            res.Add(list2);
+            res.Add(list3);
+
+            // using FileStream fs = new FileStream(filePath, FileMode.Append);
+            string json = JsonConvert.SerializeObject(res, Formatting.Indented);
+
+            File.WriteAllText(filePath, json);
+        }
+
+        private void CboSort_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            int iSelectedIndex = CboSort.SelectedIndex;
+            if (iSelectedIndex == -1) return;
+
+            SortPlayList(iSelectedIndex);
+        }
+
+        // private bool _isDesc;
+
+        private bool _isFirstLoad = true;
+
+        private void SortPlayList(int index)
+        {
+            // TODO: BUG: 这里可以做一个 BUG，不这样做初次加载会出 BUG。
+            if (_isFirstLoad)
+            {
+                _isFirstLoad = false;
+                return;
+            }
+
+            // By add time ascending.
+            if (index == 0)
+            {
+                SortDescription sort = new SortDescription { Direction = ListSortDirection.Ascending, PropertyName = "AddTime" };
+                Sort(sort);
+            }
+            // By add time descending.
+            else if (index == 1)
+            {
+                SortDescription sort = new SortDescription { Direction = ListSortDirection.Descending, PropertyName = "AddTime" };
+                Sort(sort);
+            }
+            // By name ascending.
+            else if (index == 2)
+            {
+                SortDescription sort = new SortDescription { Direction = ListSortDirection.Ascending, PropertyName = "Name" };
+                Sort(sort);
+            }
+            // By name descending.
+            else if (index == 3)
+            {
+                SortDescription sort = new SortDescription { Direction = ListSortDirection.Descending, PropertyName = "Name" };
+                Sort(sort);
+            }
+            // By size ascending.
+            else if (index == 4)
+            {
+                SortDescription sort = new SortDescription { Direction = ListSortDirection.Ascending, PropertyName = "Size" };
+                Sort(sort);
+            }
+            // By size descending.
+            else if (index == 5)
+            {
+                SortDescription sort = new SortDescription { Direction = ListSortDirection.Descending, PropertyName = "Size" };
+                Sort(sort);
+            }
+            // By duration ascending.
+            else if (index == 6)
+            {
+                SortDescription sort = new SortDescription { Direction = ListSortDirection.Ascending, PropertyName = "Duration" };
+                Sort(sort);
+            }
+            // By duration descending.
+            else
+            {
+                SortDescription sort = new SortDescription { Direction = ListSortDirection.Descending, PropertyName = "Duration" };
+                Sort(sort);
+            }
+        }
+
+        private void Sort(SortDescription description)
+        {
+            var vm1 = PlayListContents.DataContext as PlayListItemsViewModel;
+            var vm2 = MyCollectionContents.DataContext as PlayListItemsViewModel;
+            var vm3 = PlayHistoryContents.DataContext as PlayListItemsViewModel;
+
+            List<PlayListItemModel> res1 = null;
+            List<PlayListItemModel> res2 = null;
+            List<PlayListItemModel> res3 = null;
+
+            if (description.PropertyName == "AddTime")
+            {
+                if (description.Direction == ListSortDirection.Ascending)
+                {
+
+                    res1 = vm1.Contents.OrderBy(e => e.AddTime).ToList();
+                    res2 = vm2.Contents.OrderBy(e => e.AddTime).ToList();
+                    res3 = vm3.Contents.OrderBy(e => e.AddTime).ToList();
+                }
+                else
+                {
+                    res1 = vm1.Contents.OrderByDescending(e => e.AddTime).ToList();
+                    res2 = vm2.Contents.OrderByDescending(e => e.AddTime).ToList();
+                    res3 = vm3.Contents.OrderByDescending(e => e.AddTime).ToList();
+                }
+            }
+            else if (description.PropertyName == "Name")
+            {
+                if (description.Direction == ListSortDirection.Ascending)
+                {
+
+                    res1 = vm1.Contents.OrderBy(e => e.Title).ToList();
+                    res2 = vm2.Contents.OrderBy(e => e.Title).ToList();
+                    res3 = vm3.Contents.OrderBy(e => e.Title).ToList();
+                }
+                else
+                {
+                    res1 = vm1.Contents.OrderByDescending(e => e.Title).ToList();
+                    res2 = vm2.Contents.OrderByDescending(e => e.Title).ToList();
+                    res3 = vm3.Contents.OrderByDescending(e => e.Title).ToList();
+                }
+            }
+            else if (description.PropertyName == "Size")
+            {
+                if (description.Direction == ListSortDirection.Ascending)
+                {
+
+                    res1 = vm1.Contents.OrderBy(e => e.Size).ToList();
+                    res2 = vm2.Contents.OrderBy(e => e.Size).ToList();
+                    res3 = vm3.Contents.OrderBy(e => e.Size).ToList();
+                }
+                else
+                {
+                    res1 = vm1.Contents.OrderByDescending(e => e.Size).ToList();
+                    res2 = vm2.Contents.OrderByDescending(e => e.Size).ToList();
+                    res3 = vm3.Contents.OrderByDescending(e => e.Size).ToList();
+                }
+            }
+            else
+            {
+                if (description.Direction == ListSortDirection.Ascending)
+                {
+
+                    res1 = vm1.Contents.OrderBy(e => e.Duration).ToList();
+                    res2 = vm2.Contents.OrderBy(e => e.Duration).ToList();
+                    res3 = vm3.Contents.OrderBy(e => e.Duration).ToList();
+                }
+                else
+                {
+                    res1 = vm1.Contents.OrderByDescending(e => e.Duration).ToList();
+                    res2 = vm2.Contents.OrderByDescending(e => e.Duration).ToList();
+                    res3 = vm3.Contents.OrderByDescending(e => e.Duration).ToList();
+                }
+            }
+
+            vm1.Contents.Clear();
+            foreach (var b in res1)
+            {
+                vm1.Contents.Add(b);
+            }
+
+            vm1.RefreshConnection();
+
+            vm2.Contents.Clear();
+            foreach (var b in res2)
+            {
+                vm2.Contents.Add(b);
+            }
+
+            vm2.RefreshConnection();
+
+            vm3.Contents.Clear();
+            foreach (var b in res3)
+            {
+                vm3.Contents.Add(b);
+            }
+
+            vm3.RefreshConnection();
         }
     }
 }

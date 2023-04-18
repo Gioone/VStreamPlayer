@@ -11,6 +11,7 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Threading;
 using VStreamPlayer.Core;
+using VStreamPlayer.FFMpeg;
 using VStreamPlayer.MVVM.Models;
 using VStreamPlayer.MVVM.ViewModels;
 using VStreamPlayer.MVVM.Views;
@@ -25,15 +26,22 @@ namespace VStreamPlayer
 {
     // TODO: 鼠标在进度条上时，应该显示视频的缩略图
     // TODO: 打开视频，音量的大小等操作应该显示在窗体上给用户提示
+    // TODO: 播放多种格式音频进行测试
     /// <summary>
     /// MainWindow.xaml 的交互逻辑
     /// </summary>
     public partial class MainWindow : System.Windows.Window, INotifyPropertyChanged
     {
+        private string _currentVideoPath;
+
         /// <summary>
         /// Path of current playing video.
         /// </summary>
-        public string CurrentVideoPath { get; set; }
+        public string CurrentVideoPath
+        {
+            get { return _currentVideoPath; }
+            set { SetField(ref _currentVideoPath, value); }
+        }
 
         /// <summary>
         /// Play List
@@ -66,7 +74,7 @@ namespace VStreamPlayer
         public VStreamPlayer.Core.WindowState VStreamPlayerWindowState { get; set; } = Core.WindowState.Normal;
 
         private bool _isMuted;
-        
+
         // private double _lastVolume;
 
         /// <summary>
@@ -75,18 +83,11 @@ namespace VStreamPlayer
         public bool IsMuted
         {
             get { return _isMuted; }
-            set
-            {
-                SetField(ref _isMuted, value);
-            }
+            set { SetField(ref _isMuted, value); }
         }
 
 
-        public bool CurrentVideoIsValid
-        {
-            get;
-            set;
-        }
+        public bool CurrentVideoIsValid { get; set; }
 
         private bool _isPaused;
 
@@ -235,15 +236,9 @@ namespace VStreamPlayer
 
         public VideoInfo VideoInfo
         {
-            get
-            {
-                return _videoInfo;
-            }
+            get { return _videoInfo; }
 
-            set
-            {
-                SetField(ref _videoInfo, value);
-            }
+            set { SetField(ref _videoInfo, value); }
         }
 
         private bool _isOnTop;
@@ -253,15 +248,9 @@ namespace VStreamPlayer
         /// </summary>
         public bool IsOnTop
         {
-            get
-            {
-                return _isOnTop;
-            }
+            get { return _isOnTop; }
 
-            set
-            {
-                SetField(ref _isOnTop, value);
-            }
+            set { SetField(ref _isOnTop, value); }
         }
 
         static MainWindow()
@@ -277,7 +266,8 @@ namespace VStreamPlayer
 
         private void AddHandlers()
         {
-            ProgressSlider.AddHandler(MouseLeftButtonDownEvent, new MouseButtonEventHandler(ProgressSlider_MouseLeftButtonDown), true);
+            ProgressSlider.AddHandler(MouseLeftButtonDownEvent,
+                new MouseButtonEventHandler(ProgressSlider_MouseLeftButtonDown), true);
         }
 
         // TODO: BUG: 这里可以做一个测试 BUG，当单击视频进度条时，进度条不会跳转
@@ -309,7 +299,7 @@ namespace VStreamPlayer
 
                 ProgressSlider.Value = dRes;
 
-                
+
                 MediaMain.Position = TimeSpan.FromMilliseconds(dRes);
             }
         }
@@ -495,18 +485,78 @@ namespace VStreamPlayer
             }
         }
 
+        private async Task OpenVideoToPlay()
+        {
+            string videoPath = HelperUtils.OpenSingleVideo();
+            if (string.IsNullOrEmpty(videoPath))
+            {
+                return;
+            }
+
+            try
+            {
+                // First, let's check current video from path is a valid video or not.
+                bool isValidVideo = await HelperUtils.CheckIsValidVideo(videoPath);
+                CurrentVideoIsValid = isValidVideo;
+
+
+                string title = VStreamPlayer.Helper.Resource.FindStringResource("Information", "Information");
+                string text = VStreamPlayer.Helper.Resource.FindStringResource("CouldNotOpenVideoFileString",
+                    "Sorry, we could not open this file.It seems to be an invalid video file...");
+                string confirm = VStreamPlayer.Helper.Resource.FindStringResource("ConfirmString", "Confirm");
+
+                if (!isValidVideo)
+                {
+                    MessageBoxInfo info = new MessageBoxInfo(title, text, confirm);
+                    info.ShowDialog();
+
+                    return;
+                }
+
+
+                if (CurrentVideoIsValid)
+                {
+                    // We hide this element under the MediaMain element. 
+                    Logo.SetValue(Panel.ZIndexProperty, -1);
+                    MediaMain.Source = new Uri(videoPath);
+                    CurrentVideoPath = videoPath;
+
+                    try
+                    {
+                        var item = new PlayListItemModel(videoPath);
+
+                        PlayListItemsViewModel vm = PlayList.PlayListContents.DataContext as PlayListItemsViewModel;
+
+                        vm?.AddItem(item);
+                        PlayList.CurrentPlayList = PlayList.PlayListContents;
+                        PlayList.CurrentPlay = item;
+                        PlayList.SetNextPlayVideo();
+                        MediaMain.Play();
+                        IsPlaying = true;
+                    }
+                    catch
+                    {
+                    }
+
+                }
+                else
+                {
+                    MessageBoxInfo info = new MessageBoxInfo(title, text, confirm);
+                    info.ShowDialog();
+                }
+            }
+            catch (NotSupportedException ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
         private async void Logo_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
 
 
             if (e.LeftButton == MouseButtonState.Pressed)
             {
-                /*
-                if (WindowState == WindowState.Maximized)
-                {
-                    WindowState = WindowState.Normal;
-                }
-                */
 
                 DragMove();
             }
@@ -515,70 +565,7 @@ namespace VStreamPlayer
             // Double click to open video file.
             if (e.ClickCount == 2 && e.ChangedButton == MouseButton.Left)
             {
-                string videoPath = HelperUtils.OpenSingleVideo();
-                if (string.IsNullOrEmpty(videoPath))
-                {
-                    return;
-                }
-
-                try
-                {
-                    // First, let's check current video from path is a valid video or not.
-                    bool isValidVideo = await HelperUtils.CheckIsValidVideo(videoPath);
-                    CurrentVideoIsValid = isValidVideo;
-
-
-                    string title = VStreamPlayer.Helper.Resource.FindStringResource("Information", "Information");
-                    string text = VStreamPlayer.Helper.Resource.FindStringResource("CouldNotOpenVideoFileString", "Sorry, we could not open this file.It seems to be an invalid video file...");
-                    string confirm = VStreamPlayer.Helper.Resource.FindStringResource("ConfirmString", "Confirm");
-
-                    if (!isValidVideo)
-                    {
-                        MessageBoxInfo info = new MessageBoxInfo(title, text, confirm);
-                        info.ShowDialog();
-
-                        return;
-                    }
-
-
-                    if (CurrentVideoIsValid)
-                    {
-                        // We hide this element under the MediaMain element. 
-                        Logo.SetValue(Panel.ZIndexProperty, -1);
-                        MediaMain.Source = new Uri(videoPath);
-                        CurrentVideoPath = videoPath;
-
-                        try
-                        {
-                            var item = new PlayListItemModel(videoPath);
-
-                            PlayListItemsViewModel vm = PlayList.PlayListContents.DataContext as PlayListItemsViewModel;
-
-                            vm?.AddItem(item);
-                            PlayList.CurrentPlayList = PlayList.PlayListContents;
-                            PlayList.CurrentPlay = item;
-                            PlayList.SetNextPlayVideo();
-                            
-                        }
-                        catch
-                        {
-
-                        }
-
-                        MediaMain.Play();
-                        IsPlaying = true;
-                    }
-                    else
-                    {
-                        MessageBoxInfo info = new MessageBoxInfo(title, text, confirm);
-                        info.ShowDialog();
-                    }
-                    // TODO: 没有后缀名的文件没有做处理
-                }
-                catch (NotSupportedException ex)
-                {
-                    MessageBox.Show(ex.Message);
-                }
+                await OpenVideoToPlay();
             }
 
         }
@@ -635,7 +622,7 @@ namespace VStreamPlayer
                 {
                     PlayOrPauseVideo();
                 }
-            }  
+            }
             // Maximize/normal window
             else if (e.Key == Key.Enter)
             {
@@ -689,6 +676,8 @@ namespace VStreamPlayer
             IsPaused = false;
             IsStopped = false;
             CurrentVideoIsValid = false;
+
+            Debug.WriteLine(e.ErrorException.Message);
         }
 
         private void MediaMain_MediaOpened(object sender, RoutedEventArgs e)
@@ -796,8 +785,12 @@ namespace VStreamPlayer
 
         private void StopVideo()
         {
-            IsStopped = true;
-            MediaMain.Stop();
+            // TODO: BUG: 这里可以做一个没有播放视频时先点击停止按钮在点击播放时的 Bug
+            if (IsPlaying || IsStopped)
+            {
+                IsStopped = true;
+                MediaMain.Stop();
+            }
         }
 
         private void PlayArea_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -988,6 +981,7 @@ namespace VStreamPlayer
 
 
             // Double click to change window state.
+            /*
             if (e.ClickCount == 2 && e.ChangedButton == MouseButton.Left)
             {
                 if (VStreamPlayerWindowState is Core.WindowState.Normal or Core.WindowState.BorderlessNormal)
@@ -999,9 +993,15 @@ namespace VStreamPlayer
                     ChangeWindowState(Core.WindowState.Normal);
                 }
             }
+            */
         }
 
         private void BtnMultiplyPlayBackward_Click(object sender, RoutedEventArgs e)
+        {
+            DecelerateVideoPlayback();
+        }
+
+        private void DecelerateVideoPlayback()
         {
             if (MediaMain.SpeedRatio <= 0.25)
             {
@@ -1020,6 +1020,14 @@ namespace VStreamPlayer
         }
 
         private void BtnMultiplyPlayForward_Click(object sender, RoutedEventArgs e)
+        {
+            AccelerateVideoPlayback();
+        }
+
+        /// <summary>
+        /// Accelerate video playback
+        /// </summary>
+        private void AccelerateVideoPlayback()
         {
             if (MediaMain.SpeedRatio >= 5.0)
             {
@@ -1079,7 +1087,12 @@ namespace VStreamPlayer
             AboutView.Show();
         }
 
-        private async void BtnNext_Click(object sender, RoutedEventArgs e)
+        private void BtnNext_Click(object sender, RoutedEventArgs e)
+        {
+            SwitchToNext();
+        }
+
+        private async void SwitchToNext()
         {
             var vm = PlayList.CurrentPlayList.DataContext as PlayListItemsViewModel;
 
@@ -1109,7 +1122,6 @@ namespace VStreamPlayer
                 PlayList.SetNextPlayVideo();
                 await PlayAnotherVideo(selectItem.VideoPath);
             }
-            
         }
 
         private async void BtnBackward_Click(object sender, RoutedEventArgs e)
@@ -1139,12 +1151,12 @@ namespace VStreamPlayer
                 PlayList.CurrentPlay = selectItem;
                 PlayList.SetNextPlayVideo();
                 await PlayAnotherVideo(selectItem.VideoPath);
-            } 
+            }
             else
             {
                 PlayNextVideo();
             }
-            
+
         }
 
         private void ProgressSlider_MouseMove(object sender, MouseEventArgs e)
@@ -1196,15 +1208,56 @@ namespace VStreamPlayer
             MediaMain.Play();
             IsPlaying = true;
         }
+
         private void MenuItemRotate90_Click(object sender, RoutedEventArgs e)
         {
-            MediaMain.RenderTransform = 
+            MediaRotate.Angle = 90;
+
         }
 
-        private void MenuItemMaximize_Click(object sender, RoutedEventArgs e)
+        private void MaximizeItem_Click(object sender, RoutedEventArgs e)
         {
             MaximizeOrNormalWindow();
         }
+
+        private async void MenuItemOpenFile_Click(object sender, RoutedEventArgs e)
+        {
+            StopVideo();
+
+            await OpenVideoToPlay();
+        }
+
+        private void MenuItemPlayOrPause_Click(object sender, RoutedEventArgs e)
+        {
+            PlayOrPauseVideo();
+        }
+
+        private void MenuItemAccelerateVideoPlayback_Click(object sender, RoutedEventArgs e)
+        {
+            AccelerateVideoPlayback();
+        }
+
+        private void MenuItemNext_Click(object sender, RoutedEventArgs e)
+        {
+            SwitchToNext();
+        }
+
+        private void MenuItemDecelerateVideoPlayback_Click(object sender, RoutedEventArgs e)
+        {
+            DecelerateVideoPlayback();
+        }
+
+        private void RotateRestoreItem_Click(object sender, RoutedEventArgs e)
+        {
+            MediaRotate.Angle = 0;
+        }
+
+        private async void VideoInfoItem_Click(object sender, RoutedEventArgs e)
+        {
+            bool isValidVideo = await Core.HelperUtils.CheckIsValidVideo(CurrentVideoPath);
+
+
+        }
     }
-    
+
 }

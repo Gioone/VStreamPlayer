@@ -10,10 +10,11 @@
     Width="600"
     Height="350"
     MinWidth="400"
-    MouseLeftButtonDown="Window_MouseLeftButtonDown"
     MinHeight="300"
     AllowsTransparency="True"
     Background="{DynamicResource PlayAreaBackColor}"
+    MouseLeftButtonDown="Window_MouseLeftButtonDown"
+    WindowStartupLocation="CenterScreen"
     WindowStyle="None"
     mc:Ignorable="d">
     <WindowChrome.WindowChrome>

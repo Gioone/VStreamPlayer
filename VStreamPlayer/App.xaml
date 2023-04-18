@@ -3,6 +3,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="clr-namespace:VStreamPlayer"
+    xmlns:valueConverter="clr-namespace:VStreamPlayer.Convert.ValueConverter;assembly=VStreamPlayer.Convert"
     DispatcherUnhandledException="Application_DispatcherUnhandledException"
     StartupUri="MainWindow.xaml">
     <Application.Resources>
@@ -10,7 +11,7 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Theme/Default.xaml" />
                 <ResourceDictionary Source="Styles/ControlStyle.xaml" />
-                <ResourceDictionary x:Name="LanguageResource" Source="Languages/en-us.xaml" />
+                <ResourceDictionary Source="Languages/en-us.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

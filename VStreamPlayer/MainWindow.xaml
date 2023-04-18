@@ -35,46 +35,151 @@
 
         <convert:PlaybackOrderValueConverter x:Key="PlaybackOrderConverter" />
 
-        <convert:PlayAndPauseButtonConverter x:Key="PlayAndPauseButtonConverter" />
+        <convert:IsVideoInfoEnableConverter x:Key="IsVideoInfoEnableConverter" />
+
+
+        <Style TargetType="MenuItem">
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="MenuItem">
+                        <Border BorderThickness="0">
+                            <Grid
+                                Width="{TemplateBinding Width}"
+                                Height="24"
+                                Background="{DynamicResource SecondaryColorBrush}"
+                                ToolTip="{TemplateBinding Header}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="30" />
+                                    <ColumnDefinition Width="*" MinWidth="80" />
+                                </Grid.ColumnDefinitions>
+                                <Border Background="{DynamicResource WindowBackColor}" BorderThickness="0" />
+                                <Border
+                                    x:Name="_border"
+                                    Grid.ColumnSpan="2"
+                                    BorderThickness="0" />
+
+                                <!--  Menu icon  -->
+
+                                <Image
+                                    x:Name="_imgicon"
+                                    Width="12"
+                                    Height="12"
+                                    Source="{Binding Icon, RelativeSource={RelativeSource TemplatedParent}}"
+                                    Stretch="Uniform" />
+                                <TextBlock
+                                    x:Name="_txt"
+                                    Grid.Column="1"
+                                    Margin="5,0,15,0"
+                                    VerticalAlignment="Center"
+                                    Style="{DynamicResource NormalTextBlockStyle}"
+                                    Text="{Binding Header, RelativeSource={RelativeSource TemplatedParent}}" />
+
+                                <!--  Arrow  -->
+
+                                <Path
+                                    x:Name="_path"
+                                    Grid.Column="1"
+                                    Margin="5,13,5,0"
+                                    HorizontalAlignment="Right"
+                                    Data="M0,4 4,0 0,-4 z"
+                                    Fill="{DynamicResource TextColorBrush}"
+                                    Visibility="Collapsed" />
+
+                                <!--  Sub Menu  -->
+
+                                <Popup
+                                    x:Name="SubMenuPopup"
+                                    AllowsTransparency="True"
+                                    Focusable="False"
+                                    IsOpen="{TemplateBinding IsSubmenuOpen}"
+                                    Placement="Right">
+                                    <ScrollViewer ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Auto">
+                                        <Border
+                                            Name="SubmenuBorder"
+                                            Background="{DynamicResource SecondaryColorBrush}"
+                                            BorderBrush="{DynamicResource MainColorBrush}"
+                                            BorderThickness="1"
+                                            SnapsToDevicePixels="True">
+                                            <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Cycle" />
+                                        </Border>
+                                    </ScrollViewer>
+                                </Popup>
+
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="HasItems" Value="true">
+                                <Setter TargetName="_path" Property="Visibility" Value="Visible" />
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="true">
+                                <Setter TargetName="_border" Property="Background" Value="{DynamicResource MainColorBrush}" />
+                                <Setter TargetName="_txt" Property="Foreground" Value="{DynamicResource TextColorBrush}" />
+                                <Setter TargetName="_path" Property="Fill" Value="{DynamicResource TextColorBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter TargetName="_txt" Property="Foreground" Value="Gray" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
 
         <!--  Menu  -->
         <ContextMenu x:Key="MyMenu">
             <ContextMenu.Style>
-                <Style TargetType="ContextMenu" />
+                <Style TargetType="ContextMenu">
+                    <Setter Property="Focusable" Value="False" />
+                </Style>
             </ContextMenu.Style>
 
-            <MenuItem Header="打开文件" />
-            <Separator />
+            <MenuItem Click="MenuItemOpenFile_Click" Header="打开文件" />
+
+            <MenuItem Header="播放">
+                <MenuItem Click="MenuItemPlayOrPause_Click" Header="播放/暂停" />
+                <MenuItem Header="上一首" />
+                <MenuItem Click="MenuItemNext_Click" Header="下一首" />
+                <MenuItem Header="快进 5 秒" />
+                <MenuItem Header="后退 5 秒" />
+                <Separator />
+                <MenuItem Header="倍速播放">
+                    <MenuItem Click="MenuItemAccelerateVideoPlayback_Click" Header="加快 0.25 倍" />
+                    <MenuItem Click="MenuItemDecelerateVideoPlayback_Click" Header="减速 0.25 倍" />
+                    <MenuItem Header="手动设置倍速..." />
+                </MenuItem>
+            </MenuItem>
+
+
+            <!--  Volume plus, volume sub, volume mute  -->
+            <MenuItem Header="音量">
+                <MenuItem Header="音量+" />
+                <MenuItem Header="音量-" />
+                <MenuItem Header="静音" />
+            </MenuItem>
             <MenuItem Header="视频">
                 <MenuItem Header="水平翻转" />
                 <MenuItem Header="垂直翻转" />
                 <MenuItem Header="视频旋转">
-                    <MenuItem Header="旋转90°" Click="MenuItemRotate90_Click" />
+                    <MenuItem Click="MenuItemRotate90_Click" Header="旋转90°" />
                     <MenuItem Header="旋转180°" />
                     <MenuItem Header="旋转270°" />
-                    <MenuItem Header="旋转任意度数" />
+                    <MenuItem Header="旋转任意度数..." />
+                    <MenuItem Click="RotateRestoreItem_Click" Header="还原" />
                 </MenuItem>
             </MenuItem>
-            <Separator />
-            <!--  Volume plus, volume sub, volume mute  -->
-            <MenuItem Header="音量" />
-            <Separator />
             <MenuItem Header="截图" />
-            <Separator />
-            <MenuItem Header="全屏" Click="MenuItemMaximize_Click" />
-            <Separator />
+            <MenuItem Click="MaximizeItem_Click" Header="全屏" />
             <MenuItem Header="播放列表" />
-            <Separator />
             <MenuItem Header="主题" />
-            <Separator />
             <MenuItem Header="语言" />
-            <Separator />
             <MenuItem Header="设置" />
-            <Separator />
-            <MenuItem Header="视频信息" />
-            <Separator />
+            <MenuItem
+                Click="VideoInfoItem_Click"
+                Header="视频信息"
+                IsEnabled="{Binding CurrentVideoPath, Converter={StaticResource IsVideoInfoEnableConverter}}" />
             <MenuItem Click="AboutItem_Click" Header="关于" />
-            <Separator />
         </ContextMenu>
 
     </Window.Resources>
@@ -122,7 +227,7 @@
                 Grid.Column="1"
                 Margin="5,0,5,0"
                 Style="{DynamicResource WindowTitleStyle}"
-                Text="{Binding Title, Mode=OneTime}" />
+                Text="{Binding Title, Mode=OneWay}" />
 
             <StackPanel
                 Grid.Column="2"
@@ -159,6 +264,7 @@
                     x:Name="BtnWindowed"
                     Click="BtnWindowed_Click"
                     Style="{DynamicResource TitleWindowedButtonStyle}"
+                    ToolTip="{DynamicResource WindowTitleWindowed}"
                     ToolTipService.InitialShowDelay="50" />
 
                 <!--  Maximized Button  -->
@@ -214,8 +320,8 @@
                 Volume=".5">
                 <MediaElement.RenderTransform>
                     <TransformGroup>
-                        <RotateTransform />
-                        <ScaleTransform />
+                        <RotateTransform x:Name="MediaRotate" />
+                        <ScaleTransform x:Name="MediaScale" />
                     </TransformGroup>
                 </MediaElement.RenderTransform>
             </MediaElement>
@@ -362,6 +468,7 @@
                         MouseRightButtonDown="BtnMultiplyPlayBackward_MouseRightButtonDown"
                         RenderTransformOrigin=".5,.5"
                         Style="{DynamicResource MultiplySpeedPlayBackwardButtonStyle}"
+                        ToolTip="{DynamicResource DeceleratePlaybackString}"
                         ToolTipService.InitialShowDelay="50">
                         <Button.RenderTransform>
                             <ScaleTransform ScaleX="-1" />
@@ -374,6 +481,7 @@
                         Click="BtnBackward_Click"
                         RenderTransformOrigin=".5,.5"
                         Style="{DynamicResource NextButtonStyle}"
+                        ToolTip="{DynamicResource PreviousString}"
                         ToolTipService.InitialShowDelay="50">
                         <Button.RenderTransform>
                             <ScaleTransform ScaleX="-1" />
@@ -393,6 +501,7 @@
                         Margin="15,0,0,0"
                         Click="BtnNext_Click"
                         Style="{DynamicResource NextButtonStyle}"
+                        ToolTip="{DynamicResource NextString}"
                         ToolTipService.InitialShowDelay="50" />
 
                     <Button
@@ -400,6 +509,7 @@
                         Margin="15,0,0,0"
                         Click="BtnStop_Click"
                         Style="{DynamicResource StopButtonStyle}"
+                        ToolTip="{DynamicResource StopString}"
                         ToolTipService.InitialShowDelay="50" />
 
                     <Button
@@ -408,6 +518,7 @@
                         Click="BtnMultiplyPlayForward_Click"
                         MouseRightButtonDown="BtnMultiplyPlayForward_MouseRightButtonDown"
                         Style="{DynamicResource MultiplySpeedPlayBackwardButtonStyle}"
+                        ToolTip="{DynamicResource AcceleratePlaybackString}"
                         ToolTipService.InitialShowDelay="50" />
                 </StackPanel>
 
@@ -436,11 +547,13 @@
                             IsMoveToPointEnabled="True"
                             Maximum="1"
                             Minimum="0"
+                            ToolTipService.InitialShowDelay="50"
                             Value="{Binding ElementName=MediaMain, Path=Volume, Mode=TwoWay}">
                             <Slider.Style>
                                 <Style TargetType="Slider">
-                                    <Setter Property="Template" Value="{DynamicResource SliderHorizontal}" />
+                                    <Setter Property="Template" Value="{DynamicResource SliderHorizontalVolume}" />
                                 </Style>
+
                             </Slider.Style>
                         </Slider>
                     </StackPanel>
@@ -453,6 +566,7 @@
                         HorizontalAlignment="Center"
                         Click="BtnSettings_Click"
                         Style="{DynamicResource SettingsButtonStyle}"
+                        ToolTip="{DynamicResource SettingsString}"
                         ToolTipService.InitialShowDelay="50" />
 
                     <!--  Play list  -->
@@ -462,6 +576,7 @@
                         HorizontalAlignment="Center"
                         Click="Button_Click"
                         Style="{DynamicResource PlayListStyle}"
+                        ToolTip="{DynamicResource PlayListString}"
                         ToolTipService.InitialShowDelay="50" />
                 </Grid>
             </Grid>

@@ -175,6 +175,8 @@ namespace VStreamPlayer.Core
         /// <returns><see langword="true" /> is a valid video. <see langword="false" /> is not a valid video.</returns>
         public static async Task<bool> CheckIsValidVideo(string videoPath)
         {
+            if (!File.Exists(videoPath)) return false;
+
             string videoFormats = await FFMpegHelper.GetVideoFormat(videoPath);
 
             if (string.IsNullOrEmpty(videoFormats))

@@ -30,6 +30,7 @@ namespace VStreamPlayer.MVVM.Views
         {
             InitializeComponent();
             LoadLanguages();
+            LoadThemes();
         }
 
         private void LoadLanguages()
@@ -60,6 +61,7 @@ namespace VStreamPlayer.MVVM.Views
                     }
                 }
 
+                // Set the current selected language
                 var resources = Application.Current.Resources.MergedDictionaries;
 
                 foreach (var v in resources)
@@ -70,7 +72,7 @@ namespace VStreamPlayer.MVVM.Views
                             .Split(new[] {'.'}, StringSplitOptions.RemoveEmptyEntries)[0];
                         foreach (var item in CboLanguage.Items)
                         {
-                            if (item.ToString() == strLanguage)
+                            if (string.Equals(item.ToString(), strLanguage, StringComparison.OrdinalIgnoreCase))
                             {
                                 CboLanguage.SelectedItem = item;
                             }
@@ -78,19 +80,61 @@ namespace VStreamPlayer.MVVM.Views
                     }
                 }
 
-                /*
-                string strLanguagesPath = Path.Combine(System.Windows.Forms.Application.StartupPath, "Languages");
-                string[] strLanguages = Directory.GetFiles(strLanguagesPath, "*.*", SearchOption.TopDirectoryOnly);
 
-                for (int i = 0; i < strLanguages.Length; i++)
+            }
+            catch
+            {
+
+            }
+        }
+
+        private void LoadThemes()
+        {
+            try
+            {
+                Assembly assembly = Assembly.GetAssembly(GetType());
+
+                string resourcesName = assembly.GetName().Name + ".g";
+                ResourceManager rm = new ResourceManager(resourcesName, assembly);
+
+                using (ResourceSet set = rm.GetResourceSet(CultureInfo.CurrentCulture, true, true))
                 {
-                    string strLanguagePath = strLanguages[i];
+                    foreach (DictionaryEntry item in set)
+                    {
+                        string strTheme = item.Key.ToString();
+                        
+                        if (strTheme.StartsWith("theme", StringComparison.OrdinalIgnoreCase))
+                        {
+                            // It's like default.baml
+                            string[] splits = strTheme.Split(new[] {'/'}, StringSplitOptions.RemoveEmptyEntries);
 
-                    string[] strSplits = strLanguagePath.Split('/');
+                            // We get like default
+                            string strDefault = splits[1].Split(new[] {'.'}, StringSplitOptions.RemoveEmptyEntries)[0];
 
-                    strLanguages[i] = strSplits[strSplits.Length - 1];
+                            CboTheme.Items.Add(strDefault);
+                        }
+                    }
                 }
-                */
+
+                // Set the current selected theme
+                var resources = Application.Current.Resources.MergedDictionaries;
+
+                foreach (var v in resources)
+                {
+                    if (v.Source.ToString().StartsWith("theme", StringComparison.OrdinalIgnoreCase))
+                    {
+                        // We got like the "default" string.
+                        var strTheme = v.Source.ToString().Split(new[] {'/'}, StringSplitOptions.RemoveEmptyEntries)[1]
+                            .Split(new[] {'.'}, StringSplitOptions.RemoveEmptyEntries)[0];
+                        foreach (var item in CboTheme.Items)
+                        {
+                            if (string.Equals(item.ToString(), strTheme, StringComparison.OrdinalIgnoreCase))
+                            {
+                                CboTheme.SelectedItem = item;
+                            }
+                        }
+                    }
+                }
 
 
             }
@@ -125,6 +169,26 @@ namespace VStreamPlayer.MVVM.Views
 
                 }
             }
+        }
+
+        private void CboTheme_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            // TODO: 这里有 BUG
+            /*
+            var resources = Application.Current.Resources.MergedDictionaries;
+
+            foreach (var v in resources)
+            {
+                // Find the theme resources.
+                if (v.Source.ToString().StartsWith("theme", StringComparison.OrdinalIgnoreCase))
+                {
+                    string strSelectedTheme = CboLanguage.SelectedItem.ToString();
+
+                    v.Source = new Uri($"Theme/{strSelectedTheme}.xaml", UriKind.Relative);
+
+                }
+            }
+            */
         }
     }
 }

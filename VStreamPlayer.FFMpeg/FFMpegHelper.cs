@@ -153,21 +153,6 @@ namespace VStreamPlayer.FFMpeg
 
             string json = sb.ToString();
 
-            /*
-            Task<string> t = default;
-            try
-            {
-                t = Probe.New().Start(strCmd);
-
-                Task.WaitAny(t);
-            }
-            catch (Exception ex)
-            {
-                // Console.WriteLine(ex.Message);
-            }
-            */
-
-            // Console.WriteLine(videoInfo);
 
             JObject jo = JsonConvert.DeserializeObject<JObject>(json);
 

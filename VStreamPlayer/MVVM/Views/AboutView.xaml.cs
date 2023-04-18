@@ -15,7 +15,9 @@ namespace VStreamPlayer.MVVM.Views
 
         private void BtnClose_Click(object sender, RoutedEventArgs e)
         {
-            Close();
+            // 这里可以做一个 BUG，当窗口关闭后主界面再单击后会报异常。
+            // Close();
+            Hide();
         }
 
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
